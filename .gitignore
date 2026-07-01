@@ -1,0 +1,33 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local env (copy from .env.example)
+.env
+
+# Unwired shadcn scaffold output (literal "@" dir, unrelated support-ticket
+# template) — not imported anywhere in src/. Left on disk; not committed.
+/@/
+/components/
+/components.json
