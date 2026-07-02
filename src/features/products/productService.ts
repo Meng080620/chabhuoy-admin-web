@@ -72,3 +72,28 @@ export async function updateProductVisibility(
   })
   return data.data
 }
+
+// Unsetting Content-Type lets axios detect the FormData body and set
+// `multipart/form-data` with the correct boundary (same trick as bannerService).
+const MULTIPART = { headers: { 'Content-Type': undefined } }
+
+/**
+ * POST /admin/products/{uuid}/image — multipart, field `image` (the raw File).
+ * Replaces any existing image server-side. Returns the updated product with its
+ * new absolute `image_url`.
+ */
+export async function uploadProductImage(id: string, image: File): Promise<Product> {
+  const fd = new FormData()
+  fd.append('image', image)
+  const { data } = await api.post<Wrapped<Product>>(`/admin/products/${id}/image`, fd, MULTIPART)
+  return data.data
+}
+
+/**
+ * DELETE /admin/products/{uuid}/image — clears the image (file + column).
+ * Idempotent server-side; returns the product with `image_url: null`.
+ */
+export async function removeProductImage(id: string): Promise<Product> {
+  const { data } = await api.delete<Wrapped<Product>>(`/admin/products/${id}/image`)
+  return data.data
+}

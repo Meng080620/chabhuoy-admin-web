@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
-import { PRODUCT_STATUSES, type ProductStatus } from '@/types/api'
-import { useAdminProducts, useUpdateProductVisibility } from '@/features/products/useProducts'
+import { PRODUCT_STATUSES, type Product, type ProductStatus } from '@/types/api'
+import {
+  useAdminProducts,
+  useRemoveProductImage,
+  useUpdateProductVisibility,
+  useUploadProductImage,
+} from '@/features/products/useProducts'
 import { Spinner } from '@/components/ui/Spinner'
 import { Pagination } from '@/components/ui/Pagination'
+import { ImageIcon } from '@/components/ui/icons'
 import { formatCurrency } from '@/utils/format'
 import { apiErrorMessage } from '@/lib/api'
 
@@ -23,6 +29,9 @@ export function AdminProductsPage() {
     }, 350)
     return () => clearTimeout(id)
   }, [input])
+
+  // The product whose image is being managed in the modal (null = closed).
+  const [managing, setManaging] = useState<Product | null>(null)
 
   const { data, isLoading, isFetching, error } = useAdminProducts({
     status: filter === 'all' ? undefined : filter,
@@ -90,6 +99,7 @@ export function AdminProductsPage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-muted">
                 <tr>
+                  <th className="px-4 py-2 font-medium">Image</th>
                   <th className="px-4 py-2 font-medium">Product</th>
                   <th className="px-4 py-2 font-medium">Vendor</th>
                   <th className="px-4 py-2 font-medium">Category</th>
@@ -108,6 +118,9 @@ export function AdminProductsPage() {
 
                   return (
                     <tr key={product.id}>
+                      <td className="px-4 py-3">
+                        <Thumbnail url={product.image_url} alt={product.name} />
+                      </td>
                       <td className="px-4 py-3 font-medium text-ink">{product.name}</td>
                       <td className="px-4 py-3 text-slate-600">{product.vendor?.name ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-600">{product.category?.name ?? '—'}</td>
@@ -127,7 +140,14 @@ export function AdminProductsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setManaging(product)}
+                            className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                          >
+                            Image
+                          </button>
                           <button
                             type="button"
                             disabled={isMutatingRow}
@@ -153,6 +173,130 @@ export function AdminProductsPage() {
         ) : (
           <p className="px-4 py-6 text-sm text-muted">No products match this filter.</p>
         )}
+      </div>
+
+      {managing ? (
+        <ProductImageManager product={managing} onClose={() => setManaging(null)} />
+      ) : null}
+    </div>
+  )
+}
+
+function Thumbnail({ url, alt }: { url: string | null; alt: string }) {
+  if (!url) {
+    return (
+      <div className="flex size-10 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+        <ImageIcon className="size-5" />
+      </div>
+    )
+  }
+  return <img src={url} alt={alt} className="size-10 rounded-lg object-cover" />
+}
+
+interface ManagerProps {
+  product: Product
+  onClose: () => void
+}
+
+/**
+ * Per-product image manager. Upload replaces any existing image server-side;
+ * remove is only offered when one is set. Both close the modal on success —
+ * the list invalidates and the row thumbnail refreshes from the refetch.
+ */
+function ProductImageManager({ product, onClose }: ManagerProps) {
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const upload = useUploadProductImage()
+  const remove = useRemoveProductImage()
+
+  // Revoke the object URL when the chosen file changes or the modal unmounts —
+  // otherwise each selection leaks a blob URL. Guarded because jsdom (tests)
+  // doesn't implement createObjectURL.
+  useEffect(() => {
+    if (!file || typeof URL.createObjectURL !== 'function') {
+      setPreview(null)
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [file])
+
+  const pending = upload.isPending || remove.isPending
+  const error = upload.error ?? remove.error
+  const shown = preview ?? product.image_url
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Image for ${product.name}`}
+        className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-sm font-semibold text-ink">Product image</h2>
+        <p className="mt-0.5 text-xs text-muted">{product.name}</p>
+
+        <div className="mt-4 flex items-center gap-4">
+          {shown ? (
+            <img src={shown} alt={product.name} className="h-24 w-24 rounded-lg object-cover" />
+          ) : (
+            <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+              <ImageIcon className="size-7" />
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            aria-label="Choose image file"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-slate-200"
+          />
+        </div>
+
+        {error ? (
+          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+            {apiErrorMessage(error, 'Could not update the image.')}
+          </p>
+        ) : null}
+
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <div>
+            {product.image_url ? (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => remove.mutate(product.id, { onSuccess: onClose })}
+                className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+              >
+                Remove image
+              </button>
+            ) : null}
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!file || pending}
+              onClick={() =>
+                file && upload.mutate({ id: product.id, image: file }, { onSuccess: onClose })
+              }
+              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
+            >
+              {upload.isPending ? 'Uploading…' : 'Upload'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

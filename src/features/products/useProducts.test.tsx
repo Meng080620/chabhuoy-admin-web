@@ -53,6 +53,7 @@ describe('useUpdateProductVisibility — optimistic update', () => {
     stock: 8,
     in_stock: true,
     is_active: true,
+    image_url: null,
     created_at: '2026-06-30T13:02:11.000000Z',
   }
 

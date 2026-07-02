@@ -5,7 +5,9 @@ import {
   getProduct,
   listAdminProducts,
   listProducts,
+  removeProductImage,
   updateProductVisibility,
+  uploadProductImage,
   type ListAdminProductsParams,
   type ListProductsParams,
 } from './productService'
@@ -82,5 +84,30 @@ export function useUpdateProductVisibility() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: queryKeys.products.all() })
     },
+  })
+}
+
+/**
+ * Upload/replace a product's image. No optimistic update — the final `image_url`
+ * is server-derived (we don't know it until the round-trip). On settle we
+ * invalidate the whole `products` tree so the admin list, detail, and public
+ * storefront all pick up the new image.
+ */
+export function useUploadProductImage() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, image }: { id: string; image: File }) => uploadProductImage(id, image),
+    onSettled: () => qc.invalidateQueries({ queryKey: queryKeys.products.all() }),
+  })
+}
+
+/** Remove a product's image; same tree-wide invalidation on settle. */
+export function useRemoveProductImage() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => removeProductImage(id),
+    onSettled: () => qc.invalidateQueries({ queryKey: queryKeys.products.all() }),
   })
 }

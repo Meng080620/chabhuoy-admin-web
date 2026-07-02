@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Banner, BrandStore, Product } from '@/types/api'
 import {
@@ -21,25 +21,34 @@ type CardProduct = Product & { compareAt?: string | null }
 function BannerLink({
   href,
   className,
+  testId,
   children,
 }: {
   href: string | null
   className?: string
+  testId?: string
   children: ReactNode
 }) {
   const to = href ?? '/'
   if (/^https?:\/\//.test(to)) {
     return (
-      <a href={to} className={className} target="_blank" rel="noopener noreferrer">
+      <a href={to} className={className} data-testid={testId} target="_blank" rel="noopener noreferrer">
         {children}
       </a>
     )
   }
   return (
-    <Link to={to} className={className}>
+    <Link to={to} className={className} data-testid={testId}>
       {children}
     </Link>
   )
+}
+
+/** Circular shift so every panel cycles through every slot, never duplicating. */
+function rotate<T>(items: readonly T[], offset: number): T[] {
+  if (items.length === 0) return []
+  const n = ((offset % items.length) + items.length) % items.length
+  return [...items.slice(n), ...items.slice(0, n)]
 }
 
 /** Section title with an optional "View all" affordance on the right. */
@@ -111,9 +120,14 @@ function bannerToPanel(b: Banner, i: number): PanelView {
   }
 }
 
+/** How long the featured slide holds before auto-advancing to the next one. */
+const HERO_ROTATE_MS = 6000
+
 /**
  * Multi-panel promotional hero: a large lead panel + a stacked promo column.
  * Renders admin-managed `hero` banners when present; otherwise the demo panels.
+ * The whole panel set rotates on a timer (and via the dots), so every banner
+ * gets a turn as the big lead slot instead of always sitting in the same spot.
  */
 export function HeroPanels({ banners }: { banners?: Banner[] }) {
   const panels: PanelView[] =
@@ -129,14 +143,28 @@ export function HeroPanels({ banners }: { banners?: Banner[] }) {
           href: null,
         }))
 
-  const [lead, tall, ...promos] = panels
+  const [offset, setOffset] = useState(0)
+
+  useEffect(() => {
+    if (panels.length <= 1) return
+    const timer = setInterval(() => {
+      setOffset((o) => (o + 1) % panels.length)
+    }, HERO_ROTATE_MS)
+    return () => clearInterval(timer)
+  }, [panels.length])
+
+  const [lead, tall, ...promos] = rotate(panels, offset)
   // Indexed access is `T | undefined` under noUncheckedIndexedAccess; the layout
   // needs both anchor panels, so bail if the source list is somehow too short.
   if (!lead || !tall) return null
   return (
     <section>
       <div className="grid gap-4 lg:grid-cols-3">
-        <HeroPanel panel={lead} className="lg:col-span-2 lg:row-span-2 min-h-[220px]" />
+        <HeroPanel
+          panel={lead}
+          testId="hero-lead"
+          className="lg:col-span-2 lg:row-span-2 min-h-[220px]"
+        />
         <HeroPanel panel={tall} className="min-h-[150px]" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
           {promos.map((pnl) => (
@@ -144,14 +172,22 @@ export function HeroPanels({ banners }: { banners?: Banner[] }) {
           ))}
         </div>
       </div>
-      <div className="mt-3 flex justify-center gap-1.5">
-        {panels.slice(0, 4).map((pnl, i) => (
-          <span
-            key={pnl.key}
-            className={`h-1.5 rounded-full ${i === 0 ? 'w-5 bg-brand-600' : 'w-1.5 bg-slate-300'}`}
-          />
-        ))}
-      </div>
+      {panels.length > 1 ? (
+        <div className="mt-3 flex justify-center gap-1.5">
+          {panels.map((pnl, i) => (
+            <button
+              key={pnl.key}
+              type="button"
+              aria-label={`Show slide ${i + 1}`}
+              aria-current={i === offset}
+              onClick={() => setOffset(i)}
+              className={`h-1.5 rounded-full transition-all ${
+                i === offset ? 'w-5 bg-brand-600' : 'w-1.5 bg-slate-300 hover:bg-slate-400'
+              }`}
+            />
+          ))}
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -160,14 +196,17 @@ function HeroPanel({
   panel,
   className = '',
   compact = false,
+  testId,
 }: {
   panel: PanelView
   className?: string
   compact?: boolean
+  testId?: string
 }) {
   return (
     <BannerLink
       href={panel.href}
+      testId={testId}
       className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br p-5 text-white ${panel.gradient} ${className}`}
     >
       {panel.imageUrl ? (

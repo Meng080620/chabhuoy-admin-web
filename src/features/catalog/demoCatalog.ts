@@ -26,6 +26,8 @@ function p(
     stock: opts.stock ?? 25,
     in_stock: (opts.stock ?? 25) > 0,
     is_active: true,
+    // Demo cards derive imagery deterministically from `id`, not the API field.
+    image_url: null,
     category: { id: seq, name: category },
     created_at: '2026-06-01T00:00:00Z',
     /** Demo "was" price for a strikethrough — present only on sale items. */
@@ -139,7 +141,7 @@ export const CIRCLE_CATEGORIES: readonly { id: string; label: string; seed: stri
 export const BRAND_STORES: readonly { name: string; caption: string }[] = [
   { name: 'Adidas', caption: 'Delivery within 24 hours' },
   { name: 'Nestlé', caption: 'Delivery within 24 hours' },
-  { name: 'Pdrepper', caption: 'Delivery within 24 hours' },
+  { name: 'P&G', caption: 'Delivery within 24 hours' },
   { name: 'LG Electronics', caption: 'Delivery within 24 hours' },
   { name: 'Dell', caption: 'Delivery within 24 hours' },
   { name: 'Apple', caption: 'Delivery within 24 hours' },

@@ -47,6 +47,21 @@ describe('OrderDetailPage', () => {
     expect(screen.queryByText('Tracking')).toBeNull()
   })
 
+  it('shows a per-line fulfillment status badge, including the new returned state', async () => {
+    renderPage({
+      ...BASE_ORDER,
+      // A multi-vendor order whose lines diverged: one delivered, one sent back.
+      items: [
+        { product_name: 'Rattan Basket', quantity: 3, unit_price: '120.67', line_total: '350.00', status: 'delivered' },
+        { product_name: 'Silk Scarf', quantity: 1, unit_price: '12.01', line_total: '12.01', status: 'returned' },
+      ],
+    })
+
+    await waitFor(() => expect(screen.getByText('Silk Scarf', { exact: false })).toBeInTheDocument())
+    expect(screen.getByText('Returned')).toBeInTheDocument()
+    expect(screen.getByText('Delivered')).toBeInTheDocument()
+  })
+
   it('shows carrier and tracking number per parcel, naming the shipping vendor', async () => {
     renderPage({
       ...BASE_ORDER,

@@ -2,6 +2,7 @@ import { AxiosError } from 'axios'
 import { Link, useParams } from 'react-router-dom'
 import { useMyOrder } from '@/features/orders/useMyOrders'
 import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge'
+import { LineStatusBadge } from '@/components/ui/LineStatusBadge'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { apiErrorMessage } from '@/lib/api'
@@ -46,9 +47,12 @@ export function OrderDetailPage() {
 
         <div className="mt-6 divide-y divide-slate-100 border-t border-slate-100">
           {items.map((item, idx) => (
-            <div key={`${item.product_name}-${idx}`} className="flex justify-between gap-4 py-3 text-sm">
-              <span className="min-w-0 truncate text-slate-700">
-                {item.product_name} × {item.quantity}
+            <div key={`${item.product_name}-${idx}`} className="flex items-center justify-between gap-4 py-3 text-sm">
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="min-w-0 truncate text-slate-700">
+                  {item.product_name} × {item.quantity}
+                </span>
+                <LineStatusBadge status={item.status} />
               </span>
               <span className="text-ink">{formatCurrency(item.line_total)}</span>
             </div>

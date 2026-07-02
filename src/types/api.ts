@@ -20,8 +20,9 @@ export type VendorStatus = (typeof VENDOR_STATUSES)[number]
 export const ORDER_STATUSES = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'] as const
 export type OrderStatus = (typeof ORDER_STATUSES)[number]
 
-// app/Enums/FulfillmentStatus.php — per-line status
-export type FulfillmentStatus = 'pending' | 'shipped' | 'delivered' | 'cancelled'
+// app/Enums/FulfillmentStatus.php — per-line status. `returned` is set when a
+// rider sends an undelivered parcel back to the vendor (stock is restocked).
+export type FulfillmentStatus = 'pending' | 'shipped' | 'delivered' | 'cancelled' | 'returned'
 
 // app/Enums/PaymentMethod.php
 export const PAYMENT_METHODS = ['card', 'qr', 'cod'] as const
@@ -64,6 +65,8 @@ export interface Product {
   stock: number
   in_stock: boolean
   is_active: boolean
+  /** Absolute URL to the uploaded image, or null before one is set. */
+  image_url: string | null
   category?: ProductCategoryRef
   vendor?: Vendor
   created_at: string
