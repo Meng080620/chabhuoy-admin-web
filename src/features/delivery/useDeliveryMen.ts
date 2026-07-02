@@ -10,7 +10,13 @@ import {
 
 export function useDeliveryMen(params: ListDeliveryMenParams) {
   return useQuery({
-    queryKey: queryKeys.deliveryMen.list({ status: params.status, page: params.page }),
+    // perPage is part of the key: two callers with different page sizes must
+    // not share a cache entry.
+    queryKey: queryKeys.deliveryMen.list({
+      status: params.status,
+      page: params.page,
+      perPage: params.perPage,
+    }),
     queryFn: () => listDeliveryMen(params),
     placeholderData: (prev) => prev, // keep the table populated across page/filter changes
   })

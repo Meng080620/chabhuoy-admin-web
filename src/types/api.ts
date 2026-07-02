@@ -63,13 +63,18 @@ export interface DeliveryMan {
   cash_in_hand?: string | number | null
 }
 
+// app/Enums/DeliveryEarningStatus.php — today's stub provider always lands
+// `completed`; pending/failed arrive with a real disbursement provider.
+export const DELIVERY_EARNING_STATUSES = ['pending', 'completed', 'failed'] as const
+export type DeliveryEarningStatus = (typeof DELIVERY_EARNING_STATUSES)[number]
+
 // app/Http/Resources/DeliveryEarningResource.php — a platform→rider disbursement.
 export interface DeliveryEarning {
   /** uuid */
   id: string
   delivery_man?: { id: string; name: string }
   amount: string | number
-  status: 'completed'
+  status: DeliveryEarningStatus
   /** Disbursement provider reference (disb_…), or null. */
   reference: string | null
   processed_at: string | null
@@ -230,9 +235,9 @@ export interface AdminCustomerDetail extends AdminCustomer {
 // Admin — vendor payouts
 // ---------------------------------------------------------------------------
 
-// No real disbursement provider is wired in yet — v1 pays out synchronously,
-// so `completed` is the only status a payout is ever created with.
-export const PAYOUT_STATUSES = ['completed'] as const
+// app/Enums/PayoutStatus.php — the stub provider lands `completed`
+// synchronously today; pending/failed arrive with a real provider.
+export const PAYOUT_STATUSES = ['pending', 'completed', 'failed'] as const
 export type PayoutStatus = (typeof PAYOUT_STATUSES)[number]
 
 /** A ledger row on `GET /admin/payouts`, and the `201` body of `POST /admin/payouts/{vendor}`. */
