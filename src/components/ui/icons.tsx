@@ -137,3 +137,13 @@ export function BanknoteIcon({ className }: IconProps) {
     </svg>
   )
 }
+
+export function BikeIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="5.5" cy="17.5" r="3.5" />
+      <circle cx="18.5" cy="17.5" r="3.5" />
+      <path d="M5.5 17.5 9 8h4l3 6.5M9 8l-1-3H6M13 8h4" />
+    </svg>
+  )
+}

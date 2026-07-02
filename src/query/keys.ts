@@ -63,6 +63,11 @@ export const queryKeys = {
     mine: (params: { page?: number }) => ['orders', 'mine', params] as const,
     detail: (id: string) => ['orders', 'detail', id] as const,
   },
+  deliveryMen: {
+    all: () => ['delivery-men'] as const,
+    list: (params: { status?: string; page?: number }) =>
+      ['delivery-men', 'list', params] as const,
+  },
   cart: {
     current: () => ['cart'] as const,
   },

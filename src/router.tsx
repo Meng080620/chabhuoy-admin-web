@@ -21,6 +21,7 @@ import { CategoriesPage } from '@/pages/CategoriesPage'
 import { CustomersPage } from '@/pages/CustomersPage'
 import { CustomerDetailPage } from '@/pages/CustomerDetailPage'
 import { PayoutsPage } from '@/pages/PayoutsPage'
+import { RidersPage } from '@/pages/RidersPage'
 
 export const router = createBrowserRouter([
   // Public storefront — anyone can browse; buy actions gate themselves.
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
           { path: 'customers', element: <CustomersPage /> },
           { path: 'customers/:customerId', element: <CustomerDetailPage /> },
           { path: 'payouts', element: <PayoutsPage /> },
+          { path: 'riders', element: <RidersPage /> },
           { path: 'banners', element: <BannersPage /> },
           { path: 'brand-stores', element: <BrandStoresPage /> },
         ],

@@ -12,6 +12,7 @@ import {
   TagIcon,
   CustomerIcon,
   BanknoteIcon,
+  BikeIcon,
 } from '@/components/ui/icons'
 
 interface NavItem {
@@ -43,6 +44,7 @@ const NAV: NavGroup[] = [
       { to: '/admin/categories', label: 'Categories', end: false, icon: <TagIcon className={ICON} /> },
       { to: '/admin/customers', label: 'Customers', end: false, icon: <CustomerIcon className={ICON} /> },
       { to: '/admin/payouts', label: 'Payouts', end: false, icon: <BanknoteIcon className={ICON} /> },
+      { to: '/admin/riders', label: 'Riders', end: false, icon: <BikeIcon className={ICON} /> },
     ],
   },
   {

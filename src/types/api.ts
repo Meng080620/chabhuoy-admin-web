@@ -45,6 +45,37 @@ export interface Vendor {
   payout_balance?: string | number | null
 }
 
+// DeliveryMan::STATUS_* — rider account status (same three values as vendors).
+export const DELIVERY_MAN_STATUSES = ['pending', 'active', 'suspended'] as const
+export type DeliveryManStatus = (typeof DELIVERY_MAN_STATUSES)[number]
+
+// app/Http/Resources/DeliveryManResource.php
+export interface DeliveryMan {
+  /** uuid */
+  id: string
+  name: string
+  vehicle_type: string | null
+  status: DeliveryManStatus
+  is_online: boolean
+  /** Decimal string; platform owes the rider this. Only present to admin/self. */
+  wallet_balance?: string | number | null
+  /** COD cash the rider is holding, owed back to the platform. Admin/self only. */
+  cash_in_hand?: string | number | null
+}
+
+// app/Http/Resources/DeliveryEarningResource.php — a platform→rider disbursement.
+export interface DeliveryEarning {
+  /** uuid */
+  id: string
+  delivery_man?: { id: string; name: string }
+  amount: string | number
+  status: 'completed'
+  /** Disbursement provider reference (disb_…), or null. */
+  reference: string | null
+  processed_at: string | null
+  created_at: string
+}
+
 export interface ProductCategoryRef {
   id: number
   name: string
