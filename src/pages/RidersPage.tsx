@@ -98,9 +98,9 @@ export function RidersPage() {
               <tbody className="divide-y divide-slate-100">
                 {data.data.map((rider) => {
                   // Only the row whose mutation is in flight should freeze.
+                  const isPayingOut = disburse.isPending && disburse.variables === rider.id
                   const isMutatingRow =
-                    (updateStatus.isPending && updateStatus.variables?.id === rider.id) ||
-                    (disburse.isPending && disburse.variables === rider.id)
+                    (updateStatus.isPending && updateStatus.variables?.id === rider.id) || isPayingOut
                   const canPayOut = Number(rider.wallet_balance ?? 0) > 0
 
                   return (
@@ -108,10 +108,11 @@ export function RidersPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <span
+                            role="img"
+                            aria-label={rider.is_online ? 'Online' : 'Offline'}
                             className={`inline-block size-2 shrink-0 rounded-full ${
                               rider.is_online ? 'bg-green-500' : 'bg-slate-300'
                             }`}
-                            aria-label={rider.is_online ? 'Online' : 'Offline'}
                           />
                           <div>
                             <p className="font-medium text-ink">{rider.name}</p>
@@ -150,9 +151,9 @@ export function RidersPage() {
                             disabled={isMutatingRow || !canPayOut}
                             onClick={() => disburse.mutate(rider.id)}
                             title={canPayOut ? undefined : 'Nothing owed'}
-                            className="rounded-lg border border-brand-200 px-2.5 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50 disabled:opacity-40"
+                            className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                           >
-                            Pay out
+                            {isPayingOut ? 'Paying out…' : 'Pay out'}
                           </button>
                         </div>
                       </td>
