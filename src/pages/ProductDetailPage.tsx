@@ -7,9 +7,12 @@ import { useIsAuthenticated } from '@/store/auth'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatCurrency, formatNumber } from '@/utils/format'
 import { apiErrorMessage } from '@/lib/api'
-import { demoRating, productImage } from '@/features/catalog/demo'
+import { demoRating } from '@/features/catalog/demo'
 import { StarRating } from '@/components/storefront/StarRating'
-import { StorefrontProductCard } from '@/components/storefront/StorefrontProductCard'
+import {
+  ProductImage,
+  StorefrontProductCard,
+} from '@/components/storefront/StorefrontProductCard'
 
 export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>()
@@ -47,11 +50,7 @@ export function ProductDetailPage() {
 
       <div className="mt-4 grid gap-8 lg:grid-cols-2">
         <div className="aspect-square overflow-hidden rounded-xl bg-plaster-100">
-          <img
-            src={productImage(product, 600)}
-            alt={product.name}
-            className="size-full object-cover"
-          />
+          <ProductImage product={product} />
         </div>
 
         <div>

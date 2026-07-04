@@ -18,7 +18,9 @@ const CHARM_BRACELET: Product = {
   stock: 10,
   in_stock: true,
   is_active: true,
-  image_url: null,
+  // Admin-uploaded image — products without one render the neutral
+  // placeholder (covered in StorefrontProductCard.test), never a stock photo.
+  image_url: 'http://localhost:8000/storage/products/charm.jpg',
   category: { id: 1, name: 'Jewelry' },
   vendor: { id: 'v-ama', name: 'AMA Animal Rescue', status: 'active' },
   created_at: '2026-06-01T00:00:00Z',

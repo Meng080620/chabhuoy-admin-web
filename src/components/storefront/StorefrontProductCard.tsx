@@ -40,12 +40,7 @@ export function StorefrontProductCard({ product }: { product: CardProduct }) {
       </button>
 
       <div className="relative aspect-square overflow-hidden rounded-lg bg-plaster-100">
-        <img
-          src={productImage(product, 400)}
-          alt={product.name}
-          loading="lazy"
-          className="size-full object-cover transition group-hover:scale-105"
-        />
+        <ProductImage product={product} />
         {!product.in_stock ? (
           <span className="absolute left-2 top-2 rounded-md bg-night-900/80 px-2 py-0.5 text-xs font-medium text-white">
             Sold out
@@ -72,6 +67,47 @@ export function StorefrontProductCard({ product }: { product: CardProduct }) {
         ) : null}
       </div>
     </Link>
+  )
+}
+
+/**
+ * The admin-uploaded image, or a neutral plaster tile when none exists yet.
+ * Never a fabricated stock photo — what the shopper sees is what the catalogue
+ * actually holds.
+ */
+export function ProductImage({ product }: { product: { name: string; image_url: string | null } }) {
+  const src = productImage(product)
+  if (!src) {
+    return (
+      <div
+        data-testid="product-image-placeholder"
+        aria-hidden="true"
+        className="flex size-full items-center justify-center text-plaster-300"
+      >
+        <PackageIcon />
+      </div>
+    )
+  }
+  return (
+    <img
+      src={src}
+      alt={product.name}
+      loading="lazy"
+      className="size-full object-cover transition group-hover:scale-105"
+    />
+  )
+}
+
+function PackageIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="size-10" aria-hidden="true">
+      <path
+        d="M21 8l-9-5-9 5m18 0l-9 5m9-5v8l-9 5m0-13L3 8m9 5v8m-9-13v8l9 5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 

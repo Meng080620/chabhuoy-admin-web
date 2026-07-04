@@ -29,12 +29,13 @@ export function demoImage(seed: string, size = 400): string {
 }
 
 /**
- * Product imagery: the real admin-uploaded `image_url` when the API has one,
- * the deterministic demo placeholder otherwise. `size` only affects the
- * fallback — uploaded images are served as-is.
+ * Product imagery: the real admin-uploaded `image_url`, or null. Real API
+ * products never get fabricated photos — a missing upload renders as the
+ * neutral placeholder tile. Demo catalogue items carry an explicit demo
+ * `image_url` instead ([[demoCatalog]]).
  */
-export function productImage(product: { id: string; image_url: string | null }, size = 400): string {
-  return product.image_url ?? demoImage(product.id, size)
+export function productImage(product: { image_url: string | null }): string | null {
+  return product.image_url
 }
 
 export interface DemoRating {

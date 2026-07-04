@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest'
 import { hashString, demoImage, demoRating, formatRatingCount, productImage } from './demo'
 
 describe('demo presentation helpers', () => {
-  it('productImage prefers the real image_url and falls back to demo imagery', () => {
+  it('productImage returns only the real image_url — no fabricated imagery for API products', () => {
     const real = { id: 'p1', image_url: 'http://localhost:8000/storage/products/nike.jpg' }
     const bare = { id: 'p1', image_url: null }
-    expect(productImage(real, 400)).toBe('http://localhost:8000/storage/products/nike.jpg')
-    expect(productImage(bare, 400)).toBe(demoImage('p1', 400))
+    expect(productImage(real)).toBe('http://localhost:8000/storage/products/nike.jpg')
+    expect(productImage(bare)).toBeNull()
   })
 
   it('hashString is deterministic and non-negative', () => {

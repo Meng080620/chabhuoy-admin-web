@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate, useSearchParams } from 'react-route
 import { useIsAuthenticated, useUser } from '@/store/auth'
 import { useLogout } from '@/features/auth/useAuth'
 import { useCartCount } from '@/features/cart/useCart'
+import { useCategories } from '@/features/catalog/useCategories'
 import { FOOTER_COLUMNS, NAV_LINKS } from '@/features/catalog/demo'
 
 /**
@@ -16,6 +17,11 @@ export function StorefrontLayout() {
   const user = useUser()
   const logout = useLogout()
   const cartCount = useCartCount()
+  // Live category names drive the nav strip; the demo list only covers a bare
+  // backend so the header never renders empty.
+  const { data: categories } = useCategories()
+  const navLinks =
+    categories && categories.length > 0 ? categories.map((c) => c.name).slice(0, 8) : NAV_LINKS
 
   return (
     <div className="flex min-h-screen flex-col bg-plaster-50">
@@ -93,7 +99,7 @@ export function StorefrontLayout() {
             <span className="flex shrink-0 items-center gap-1.5 font-semibold text-night-900">
               <GridIcon className="size-4" /> All Categories
             </span>
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link}
                 to={`/?q=${encodeURIComponent(link)}`}
