@@ -14,7 +14,11 @@ import {
 
 export function useProducts(params: ListProductsParams) {
   return useQuery({
-    queryKey: queryKeys.products.list({ search: params.search, page: params.page }),
+    queryKey: queryKeys.products.list({
+      search: params.search,
+      page: params.page,
+      perPage: params.perPage,
+    }),
     queryFn: () => listProducts(params),
     placeholderData: (prev) => prev,
   })

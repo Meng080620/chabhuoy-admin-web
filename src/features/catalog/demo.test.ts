@@ -1,7 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { hashString, demoImage, demoRating, formatRatingCount } from './demo'
+import { hashString, demoImage, demoRating, formatRatingCount, productImage } from './demo'
 
 describe('demo presentation helpers', () => {
+  it('productImage prefers the real image_url and falls back to demo imagery', () => {
+    const real = { id: 'p1', image_url: 'http://localhost:8000/storage/products/nike.jpg' }
+    const bare = { id: 'p1', image_url: null }
+    expect(productImage(real, 400)).toBe('http://localhost:8000/storage/products/nike.jpg')
+    expect(productImage(bare, 400)).toBe(demoImage('p1', 400))
+  })
+
   it('hashString is deterministic and non-negative', () => {
     expect(hashString('p1')).toBe(hashString('p1'))
     expect(hashString('p1')).not.toBe(hashString('p2'))

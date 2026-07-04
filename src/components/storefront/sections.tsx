@@ -51,13 +51,20 @@ function rotate<T>(items: readonly T[], offset: number): T[] {
   return [...items.slice(n), ...items.slice(0, n)]
 }
 
-/** Section title with an optional "View all" affordance on the right. */
+/**
+ * Section title with an optional "View all" affordance on the right. The small
+ * woven square is the krama tick — the same check that runs under the header,
+ * so every section reads as part of one cloth.
+ */
 export function SectionHeader({ title, to }: { title: string; to?: string }) {
   return (
     <div className="mb-4 flex items-center justify-between">
-      <h2 className="text-lg font-bold text-ink">{title}</h2>
+      <h2 className="flex items-center gap-2.5 font-display text-lg font-bold text-night-900">
+        <span aria-hidden="true" className="krama-check size-3 rounded-[3px]" />
+        {title}
+      </h2>
       {to ? (
-        <Link to={to} className="text-sm font-medium text-brand-700 hover:underline">
+        <Link to={to} className="text-sm font-medium text-kram-700 hover:underline">
           View all →
         </Link>
       ) : null}
@@ -94,27 +101,34 @@ interface PanelView {
   title: string
   subtitle: string
   cta: string
-  gradient: string
+  /** Flat panel ground — one of the PANEL_TONES family, always with white text. */
+  tone: string
   imageUrl: string | null
   href: string | null
 }
 
-const GRADIENTS = [
-  'from-brand-600 to-brand-800',
-  'from-indigo-600 to-purple-700',
-  'from-amber-500 to-orange-600',
-  'from-emerald-600 to-teal-700',
-  'from-rose-500 to-pink-600',
+/**
+ * Panel grounds stay inside the storefront family — warm ink, krama reds,
+ * lotus greens — so the page never turns into a gradient sampler. Gold is
+ * reserved for CTAs and accents, never a panel ground (white text would fail
+ * contrast on it).
+ */
+const PANEL_TONES = [
+  'bg-night-900',
+  'bg-kram-600',
+  'bg-lotus-700',
+  'bg-kram-800',
+  'bg-lotus-800',
 ]
 
-/** Map a live Banner to the panel view; gradient cycles for visual variety. */
+/** Map a live Banner to the panel view; tone cycles for visual variety. */
 function bannerToPanel(b: Banner, i: number): PanelView {
   return {
     key: b.id,
     title: b.title,
     subtitle: b.subtitle ?? '',
     cta: b.cta_label ?? 'Shop now',
-    gradient: GRADIENTS[i % GRADIENTS.length]!,
+    tone: PANEL_TONES[i % PANEL_TONES.length]!,
     imageUrl: b.image_url,
     href: b.link_url,
   }
@@ -138,7 +152,7 @@ export function HeroPanels({ banners }: { banners?: Banner[] }) {
           title: p.title,
           subtitle: p.subtitle,
           cta: p.cta,
-          gradient: p.gradient,
+          tone: p.tone,
           imageUrl: null,
           href: null,
         }))
@@ -182,7 +196,7 @@ export function HeroPanels({ banners }: { banners?: Banner[] }) {
               aria-current={i === offset}
               onClick={() => setOffset(i)}
               className={`h-1.5 rounded-full transition-all ${
-                i === offset ? 'w-5 bg-brand-600' : 'w-1.5 bg-slate-300 hover:bg-slate-400'
+                i === offset ? 'w-5 bg-kram-600' : 'w-1.5 bg-plaster-300 hover:bg-night-400'
               }`}
             />
           ))}
@@ -207,7 +221,7 @@ function HeroPanel({
     <BannerLink
       href={panel.href}
       testId={testId}
-      className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br p-5 text-white ${panel.gradient} ${className}`}
+      className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-5 text-white ${panel.tone} ${className}`}
     >
       {panel.imageUrl ? (
         <>
@@ -218,16 +232,16 @@ function HeroPanel({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
         </>
-      ) : (
-        <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full border border-white/10" />
-      )}
+      ) : null}
       <div className="relative">
-        <h3 className={compact ? 'text-base font-bold' : 'text-xl font-bold sm:text-2xl'}>
+        <h3
+          className={`font-display ${compact ? 'text-lg font-bold' : 'text-2xl font-bold sm:text-3xl'}`}
+        >
           {panel.title}
         </h3>
         {panel.subtitle ? <p className="mt-1 text-xs text-white/85">{panel.subtitle}</p> : null}
       </div>
-      <span className="relative mt-3 w-fit rounded-full bg-white/95 px-4 py-1.5 text-xs font-semibold text-ink transition group-hover:bg-white">
+      <span className="relative mt-3 w-fit rounded-full bg-dome-400 px-4 py-1.5 text-xs font-semibold text-night-900 transition group-hover:bg-dome-500">
         {panel.cta}
       </span>
     </BannerLink>
@@ -249,7 +263,7 @@ export function CircularCategoryRow({
       <div className="flex gap-4 overflow-x-auto pb-2">
         {tiles.map((t) => (
           <Link key={t.id} to="/" className="group flex w-24 shrink-0 flex-col items-center gap-2">
-            <div className="size-20 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+            <div className="size-20 overflow-hidden rounded-full bg-plaster-100 ring-1 ring-plaster-200">
               <img
                 src={demoImage(t.seed, 160)}
                 alt=""
@@ -257,7 +271,7 @@ export function CircularCategoryRow({
                 className="size-full object-cover transition group-hover:scale-105"
               />
             </div>
-            <span className="line-clamp-1 text-center text-xs font-medium text-slate-700">
+            <span className="line-clamp-1 text-center text-xs font-medium text-night-700">
               {t.label}
             </span>
           </Link>
@@ -280,7 +294,7 @@ export function PromoTrio({ banners }: { banners?: Banner[] }) {
           title: p.title,
           subtitle: p.caption,
           cta: p.cta,
-          gradient: p.gradient,
+          tone: p.tone,
           imageUrl: null,
           href: null,
         }))
@@ -291,7 +305,7 @@ export function PromoTrio({ banners }: { banners?: Banner[] }) {
         <BannerLink
           key={promo.key}
           href={promo.href}
-          className={`group relative flex min-h-[180px] flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br p-5 text-white ${promo.gradient}`}
+          className={`group relative flex min-h-[180px] flex-col justify-between overflow-hidden rounded-2xl p-5 text-white ${promo.tone}`}
         >
           {promo.imageUrl ? (
             <>
@@ -304,10 +318,12 @@ export function PromoTrio({ banners }: { banners?: Banner[] }) {
             </>
           ) : null}
           <div className="relative">
-            <h3 className="max-w-[10rem] text-xl font-bold leading-tight">{promo.title}</h3>
+            <h3 className="max-w-[12rem] font-display text-xl font-bold leading-tight">
+              {promo.title}
+            </h3>
             {promo.subtitle ? <p className="mt-1 text-xs text-white/85">{promo.subtitle}</p> : null}
           </div>
-          <span className="relative w-fit rounded-full bg-black/70 px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-black/85">
+          <span className="relative w-fit rounded-full bg-dome-400 px-4 py-1.5 text-xs font-semibold text-night-900 transition group-hover:bg-dome-500">
             {promo.cta}
           </span>
         </BannerLink>
@@ -355,22 +371,22 @@ export function BrandStores({ stores }: { stores?: BrandStore[] }) {
           <BannerLink
             key={t.key}
             href={t.href}
-            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-brand-300 hover:shadow-sm"
+            className="flex items-center gap-3 rounded-xl border border-plaster-200 bg-white p-3 transition hover:border-kram-600/40 hover:shadow-sm"
           >
             {t.logoUrl ? (
               <img
                 src={t.logoUrl}
                 alt={t.name}
-                className="size-10 shrink-0 rounded-full border border-slate-200 object-contain p-1"
+                className="size-10 shrink-0 rounded-full border border-plaster-200 object-contain p-1"
               />
             ) : (
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-ink">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-plaster-100 text-sm font-bold text-night-900">
                 {t.name.slice(0, 2)}
               </span>
             )}
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-ink">{t.name}</p>
-              {t.caption ? <p className="truncate text-xs text-muted">{t.caption}</p> : null}
+              <p className="truncate text-sm font-semibold text-night-900">{t.name}</p>
+              {t.caption ? <p className="truncate text-xs text-night-600">{t.caption}</p> : null}
             </div>
           </BannerLink>
         ))}
@@ -390,7 +406,7 @@ export function RamadanBanner({ banner }: { banner?: Banner }) {
   return (
     <BannerLink
       href={banner?.link_url ?? null}
-      className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-800 to-emerald-600 p-8 text-white"
+      className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-lotus-700 p-8 text-white"
     >
       {banner?.image_url ? (
         <>
@@ -399,17 +415,13 @@ export function RamadanBanner({ banner }: { banner?: Banner }) {
             alt=""
             className="absolute inset-0 size-full object-cover transition group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/85 to-emerald-900/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-lotus-800/90 to-lotus-800/30" />
         </>
-      ) : (
-        <div className="pointer-events-none absolute inset-0 opacity-20">
-          <div className="absolute left-1/2 top-1/2 size-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30" />
-        </div>
-      )}
+      ) : null}
       <div className="relative">
-        <h2 className="text-2xl font-bold sm:text-3xl">{title}</h2>
+        <h2 className="font-display text-2xl font-bold sm:text-3xl">{title}</h2>
         <p className="mt-2 text-sm text-white/80">{subtitle}</p>
-        <span className="mt-5 inline-block rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-emerald-950 transition group-hover:bg-amber-300">
+        <span className="mt-5 inline-block rounded-full bg-dome-400 px-5 py-2 text-sm font-semibold text-night-900 transition group-hover:bg-dome-500">
           {cta}
         </span>
       </div>
@@ -424,15 +436,15 @@ export function EcoPromo({ banner }: { banner?: Banner }) {
     banner?.subtitle ?? 'Good for you, great for the Earth — explore eco-conscious products.'
   const cta = banner?.cta_label ?? 'Buy eco-friendly'
   return (
-    <section className="overflow-hidden rounded-2xl bg-emerald-500 p-6">
+    <section className="overflow-hidden rounded-2xl bg-lotus-50 p-6 ring-1 ring-lotus-700/15">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="max-w-md text-2xl font-bold text-emerald-950">{title}</h2>
-          <p className="mt-1 text-sm text-emerald-950/70">{subtitle}</p>
+          <h2 className="max-w-md font-display text-2xl font-bold text-lotus-800">{title}</h2>
+          <p className="mt-1 text-sm text-lotus-800/70">{subtitle}</p>
         </div>
         <BannerLink
           href={banner?.link_url ?? null}
-          className="hidden shrink-0 rounded-full bg-emerald-950 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-900 sm:block"
+          className="hidden shrink-0 rounded-full bg-lotus-700 px-4 py-2 text-sm font-medium text-white hover:bg-lotus-800 sm:block"
         >
           {cta}
         </BannerLink>
@@ -442,9 +454,9 @@ export function EcoPromo({ banner }: { banner?: Banner }) {
           <Link
             key={t.seed}
             to="/"
-            className="group flex flex-col items-center gap-2 rounded-xl bg-white/95 p-2 transition hover:bg-white"
+            className="group flex flex-col items-center gap-2 rounded-xl bg-white p-2 ring-1 ring-lotus-700/10 transition hover:ring-lotus-700/30"
           >
-            <div className="aspect-square w-full overflow-hidden rounded-lg bg-emerald-50">
+            <div className="aspect-square w-full overflow-hidden rounded-lg bg-lotus-50">
               <img
                 src={demoImage(t.seed, 200)}
                 alt=""
@@ -452,7 +464,7 @@ export function EcoPromo({ banner }: { banner?: Banner }) {
                 className="size-full object-cover transition group-hover:scale-105"
               />
             </div>
-            <span className="line-clamp-1 text-center text-xs font-medium text-emerald-950">
+            <span className="line-clamp-1 text-center text-xs font-medium text-lotus-800">
               {t.label}
             </span>
           </Link>
@@ -469,14 +481,14 @@ export function ServiceBadges() {
       {SERVICE_BADGES.map((b) => (
         <div
           key={b.title}
-          className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3"
+          className="flex items-center gap-3 rounded-xl border border-plaster-200 bg-white px-4 py-3"
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-kram-50 text-kram-600">
             <CheckBadge />
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-ink">{b.title}</p>
-            <p className="truncate text-xs text-muted">{b.caption}</p>
+            <p className="truncate text-sm font-semibold text-night-900">{b.title}</p>
+            <p className="truncate text-xs text-night-600">{b.caption}</p>
           </div>
         </div>
       ))}

@@ -28,6 +28,15 @@ export function demoImage(seed: string, size = 400): string {
   return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${size}/${size}`
 }
 
+/**
+ * Product imagery: the real admin-uploaded `image_url` when the API has one,
+ * the deterministic demo placeholder otherwise. `size` only affects the
+ * fallback — uploaded images are served as-is.
+ */
+export function productImage(product: { id: string; image_url: string | null }, size = 400): string {
+  return product.image_url ?? demoImage(product.id, size)
+}
+
 export interface DemoRating {
   /** 3.5–5.0 in 0.1 steps — flattering but plausible for a storefront. */
   stars: number
@@ -51,45 +60,16 @@ export function formatRatingCount(count: number): string {
 
 // ── Static presentational content (pure demo, no backend) ───────────────────
 
-export interface HeroSlide {
-  id: string
-  title: string
-  subtitle: string
-  cta: string
-  /** Tailwind gradient classes for the banner background. */
-  gradient: string
-  seed: string
-}
-
-export const HERO_SLIDES: readonly HeroSlide[] = [
-  {
-    id: 'ramadan',
-    title: 'Seasonal deals, limited time',
-    subtitle: 'Up to 50% off across groceries & essentials',
-    cta: 'Order now',
-    gradient: 'from-emerald-700 to-emerald-500',
-    seed: 'chabhuoy-hero-groceries',
-  },
-  {
-    id: 'tech',
-    title: 'Upgrade your setup',
-    subtitle: 'Laptops, monitors & storage — handpicked',
-    cta: 'Shop tech',
-    gradient: 'from-brand-700 to-brand-500',
-    seed: 'chabhuoy-hero-tech',
-  },
-] as const
-
 /** Top category nav strip in the header. */
 export const NAV_LINKS: readonly string[] = [
   'Electronics',
   'Fashion',
   "Women's",
   "Kids' Fashion",
-  'Healthy & Beauty',
+  'Health & Beauty',
   'Pharmacy',
   'Groceries',
-  'Luxury Item',
+  'Luxury Items',
 ] as const
 
 /** Multi-panel hero: one large lead panel + stacked promo panels. */
@@ -98,7 +78,8 @@ export interface HeroPanel {
   title: string
   subtitle: string
   cta: string
-  gradient: string
+  /** Flat panel ground from the storefront tone family (white text). */
+  tone: string
   seed: string
   /** Lead panel spans two rows; promo panels are single-height. */
   size: 'lead' | 'tall' | 'promo'
@@ -110,7 +91,7 @@ export const HERO_PANELS: readonly HeroPanel[] = [
     title: 'iPhone 16 Pro Max',
     subtitle: 'A18 chip. Superfast. Biggest price drop.',
     cta: 'Shop now',
-    gradient: 'from-indigo-700 to-violet-600',
+    tone: 'bg-night-900',
     seed: 'hero-iphone',
     size: 'lead',
   },
@@ -119,7 +100,7 @@ export const HERO_PANELS: readonly HeroPanel[] = [
     title: 'Up to 50% off',
     subtitle: 'Performance footwear',
     cta: 'Shop now',
-    gradient: 'from-sky-500 to-cyan-400',
+    tone: 'bg-kram-600',
     seed: 'hero-puma',
     size: 'tall',
   },
@@ -128,7 +109,7 @@ export const HERO_PANELS: readonly HeroPanel[] = [
     title: 'Laundry detergents',
     subtitle: 'Special discounts & great offers',
     cta: 'Shop now',
-    gradient: 'from-fuchsia-700 to-purple-600',
+    tone: 'bg-lotus-700',
     seed: 'hero-laundry',
     size: 'promo',
   },
@@ -137,7 +118,7 @@ export const HERO_PANELS: readonly HeroPanel[] = [
     title: 'Create your custom bundle',
     subtitle: 'Save 20% + free shipping',
     cta: 'Shop now',
-    gradient: 'from-rose-300 to-pink-300',
+    tone: 'bg-kram-800',
     seed: 'hero-bundle',
     size: 'promo',
   },
@@ -149,7 +130,8 @@ export interface PromoCard {
   title: string
   caption: string
   cta: string
-  gradient: string
+  /** Flat panel ground from the storefront tone family (white text). */
+  tone: string
   seed: string
 }
 
@@ -159,7 +141,7 @@ export const PROMO_TRIO: readonly PromoCard[] = [
     title: 'Fresh & Healthy Vegetables',
     caption: 'Free delivery · save 50%',
     cta: 'Shop now',
-    gradient: 'from-pink-600 to-rose-500',
+    tone: 'bg-lotus-700',
     seed: 'promo-veg',
   },
   {
@@ -167,7 +149,7 @@ export const PROMO_TRIO: readonly PromoCard[] = [
     title: 'Samsung Galaxy S24 FE',
     caption: 'Galaxy AI is here',
     cta: 'Shop now',
-    gradient: 'from-sky-300 to-blue-300',
+    tone: 'bg-night-900',
     seed: 'promo-s24',
   },
   {
@@ -175,7 +157,7 @@ export const PROMO_TRIO: readonly PromoCard[] = [
     title: 'Stock-up offers',
     caption: 'Before it runs out',
     cta: 'Shop now',
-    gradient: 'from-red-600 to-orange-500',
+    tone: 'bg-kram-600',
     seed: 'promo-pantry',
   },
 ] as const
