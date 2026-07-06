@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useProduct, useProducts } from '@/features/products/useProducts'
 import { useSetCartItem } from '@/features/cart/useCart'
@@ -80,7 +81,9 @@ export function ProductDetailPage() {
           ) : null}
 
           <div className="mt-6">
-            <BuyButton product={product} />
+            {/* key resets the quantity to 1 when navigating between products
+                (related-product links change the route param without remounting). */}
+            <BuyButton key={product.id} product={product} />
           </div>
         </div>
       </div>
@@ -122,6 +125,7 @@ function RelatedProducts({ excludeId }: { excludeId: string }) {
 function BuyButton({ product }: { product: Product }) {
   const isAuthenticated = useIsAuthenticated()
   const setCartItem = useSetCartItem()
+  const [quantity, setQuantity] = useState(1)
 
   if (!product.in_stock) {
     return (
@@ -149,13 +153,42 @@ function BuyButton({ product }: { product: Product }) {
 
   return (
     <div>
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex items-center rounded-lg border border-slate-200">
+          <button
+            type="button"
+            aria-label="Decrease quantity"
+            disabled={quantity <= 1}
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            className="flex size-9 items-center justify-center text-lg font-medium text-slate-600 disabled:opacity-40"
+          >
+            −
+          </button>
+          <span
+            aria-label="Quantity"
+            aria-live="polite"
+            className="w-10 text-center text-sm font-semibold text-ink"
+          >
+            {quantity}
+          </span>
+          <button
+            type="button"
+            aria-label="Increase quantity"
+            disabled={quantity >= product.stock}
+            onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+            className="flex size-9 items-center justify-center text-lg font-medium text-slate-600 disabled:opacity-40"
+          >
+            +
+          </button>
+        </div>
+      </div>
       <button
         type="button"
         disabled={setCartItem.isPending}
         onClick={() =>
           setCartItem.mutate({
             productId: product.id,
-            quantity: 1,
+            quantity,
             product: { name: product.name, unit_price: product.price },
           })
         }

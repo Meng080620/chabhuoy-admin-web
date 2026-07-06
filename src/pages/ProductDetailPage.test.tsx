@@ -1,13 +1,17 @@
 import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { Paginated, Product } from '@/types/api'
 import * as productService from '@/features/products/productService'
+import * as cartService from '@/features/cart/cartService'
+import { useAuthStore } from '@/store/auth'
 import { ProductDetailPage } from './ProductDetailPage'
 
 vi.mock('@/features/products/productService')
+vi.mock('@/features/cart/cartService')
 
 const CHARM_BRACELET: Product = {
   id: 'p-charm',
@@ -68,6 +72,8 @@ describe('ProductDetailPage', () => {
     vi.clearAllMocks()
     vi.mocked(productService.getProduct).mockResolvedValue(CHARM_BRACELET)
     vi.mocked(productService.listProducts).mockResolvedValue(page(OTHER_PRODUCTS))
+    vi.mocked(cartService.setCartItem).mockResolvedValue(undefined)
+    useAuthStore.getState().clearAuth()
   })
 
   it('renders the product image, rating, price and stock', async () => {
@@ -96,5 +102,31 @@ describe('ProductDetailPage', () => {
     expect(within_.getByText('Rescue Ribbon Pin')).toBeInTheDocument()
     // Capped at 4 related items.
     expect(within_.queryByText('Kitten Bandana')).not.toBeInTheDocument()
+  })
+
+  it('lets a signed-in shopper adjust quantity and adds that quantity to the cart', async () => {
+    const user = userEvent.setup()
+    useAuthStore.getState().setAuth(
+      { id: 1, name: 'Shopper', email: 'shopper@example.com', role: 'customer', created_at: '2026-01-01T00:00:00Z' },
+      'test-token',
+    )
+    renderAt('p-charm')
+
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'I Love My Pet Charm Bracelet' })).toBeInTheDocument(),
+    )
+
+    const increment = screen.getByRole('button', { name: /increase quantity/i })
+    const decrement = screen.getByRole('button', { name: /decrease quantity/i })
+
+    // Floor is 1: decrement disabled at the start.
+    expect(decrement).toBeDisabled()
+    await user.click(increment)
+    await user.click(increment)
+    expect(screen.getByLabelText('Quantity')).toHaveTextContent('3')
+
+    await user.click(screen.getByRole('button', { name: /add to cart/i }))
+
+    await waitFor(() => expect(cartService.setCartItem).toHaveBeenCalledWith('p-charm', 3))
   })
 })
