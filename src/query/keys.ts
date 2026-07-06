@@ -65,7 +65,7 @@ export const queryKeys = {
   },
   deliveryMen: {
     all: () => ['delivery-men'] as const,
-    list: (params: { status?: string; page?: number; perPage?: number }) =>
+    list: (params: { status?: string; search?: string; page?: number; perPage?: number }) =>
       ['delivery-men', 'list', params] as const,
   },
   cart: {

@@ -104,4 +104,19 @@ describe('RidersPage', () => {
     await waitFor(() => expect(screen.getByText('Dara Rider')).toBeInTheDocument())
     expect(rowFor('Dara Rider').getByRole('button', { name: /pay out/i })).toBeDisabled()
   })
+
+  it('debounces the search box before querying with the trimmed term', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Sokha Rider')).toBeInTheDocument())
+    vi.mocked(deliveryService.listDeliveryMen).mockClear()
+
+    await user.type(screen.getByPlaceholderText('Search by name…'), ' Sokha ')
+
+    await waitFor(() =>
+      expect(deliveryService.listDeliveryMen).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'Sokha' }),
+      ),
+    )
+  })
 })

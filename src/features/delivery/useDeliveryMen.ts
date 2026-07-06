@@ -14,6 +14,7 @@ export function useDeliveryMen(params: ListDeliveryMenParams) {
     // not share a cache entry.
     queryKey: queryKeys.deliveryMen.list({
       status: params.status,
+      search: params.search,
       page: params.page,
       perPage: params.perPage,
     }),

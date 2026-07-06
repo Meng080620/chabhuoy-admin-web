@@ -9,17 +9,19 @@ import type {
 
 export interface ListDeliveryMenParams {
   status?: DeliveryManStatus
+  search?: string
   page?: number
   perPage?: number
 }
 
-/** GET /admin/delivery-men — paginated rider list, newest first. */
+/** GET /admin/delivery-men — paginated rider list, newest first. `search` is a name partial. */
 export async function listDeliveryMen(
   params: ListDeliveryMenParams,
 ): Promise<Paginated<DeliveryMan>> {
   const { data } = await api.get<Paginated<DeliveryMan>>('/admin/delivery-men', {
     params: {
       status: params.status,
+      search: params.search,
       page: params.page,
       per_page: params.perPage,
     },
