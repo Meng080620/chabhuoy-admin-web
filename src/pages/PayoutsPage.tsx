@@ -3,6 +3,7 @@ import { useVendors } from '@/features/vendors/useVendors'
 import { usePayouts, useDisburseVendorPayout } from '@/features/payouts/usePayouts'
 import { Spinner } from '@/components/ui/Spinner'
 import { Pagination } from '@/components/ui/Pagination'
+import { DisbursementStatusBadge } from '@/components/ui/DisbursementStatusBadge'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { apiErrorMessage } from '@/lib/api'
 
@@ -120,9 +121,7 @@ export function PayoutsPage() {
                         {formatCurrency(payout.amount)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium capitalize text-emerald-700">
-                          {payout.status}
-                        </span>
+                        <DisbursementStatusBadge status={payout.status} />
                       </td>
                       <td className="px-4 py-3 text-slate-600">{formatDate(payout.processed_at)}</td>
                     </tr>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useDeliveryEarnings } from '@/features/delivery/useDeliveryLedgers'
 import { Spinner } from '@/components/ui/Spinner'
 import { Pagination } from '@/components/ui/Pagination'
+import { DisbursementStatusBadge } from '@/components/ui/DisbursementStatusBadge'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { apiErrorMessage } from '@/lib/api'
 
@@ -51,9 +52,7 @@ export function DeliveryEarningsPage() {
                       {formatCurrency(earning.amount)}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium capitalize text-emerald-700">
-                        {earning.status}
-                      </span>
+                      <DisbursementStatusBadge status={earning.status} />
                     </td>
                     <td className="px-4 py-3 text-slate-600">{earning.reference ?? '—'}</td>
                     <td className="px-4 py-3 text-slate-600">{formatDate(earning.processed_at)}</td>
