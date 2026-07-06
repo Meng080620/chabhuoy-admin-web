@@ -26,6 +26,9 @@ dist-ssr
 # Local env (copy from .env.example)
 .env
 
+# Agent worktrees (git worktree checkouts with their own node_modules)
+.claude/worktrees/
+
 # Unwired shadcn scaffold output (literal "@" dir, unrelated support-ticket
 # template) — not imported anywhere in src/. Left on disk; not committed.
 /@/
