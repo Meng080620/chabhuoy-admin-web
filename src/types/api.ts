@@ -83,6 +83,18 @@ export interface DeliveryEarning {
   created_at: string
 }
 
+// app/Http/Resources/DeliveryCashSettlementResource.php — COD cash a rider
+// handed back to the platform. Read-only from the admin side; the rider
+// initiates the settlement themselves (no admin-facing write endpoint).
+export interface DeliveryCashSettlement {
+  /** uuid */
+  id: string
+  delivery_man?: { id: string; name: string }
+  amount: string | number
+  settled_at: string | null
+  created_at: string
+}
+
 export interface ProductCategoryRef {
   id: number
   name: string

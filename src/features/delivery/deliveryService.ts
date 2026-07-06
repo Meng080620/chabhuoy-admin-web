@@ -1,5 +1,6 @@
 import { api } from '@/lib/api'
 import type {
+  DeliveryCashSettlement,
   DeliveryEarning,
   DeliveryMan,
   DeliveryManStatus,
@@ -47,4 +48,51 @@ export async function updateDeliveryManStatus(
 export async function disburseDeliveryEarning(id: string): Promise<DeliveryEarning> {
   const { data } = await api.post<Wrapped<DeliveryEarning>>(`/admin/delivery-earnings/${id}`)
   return data.data
+}
+
+export interface ListDeliveryEarningsParams {
+  deliveryManId?: string
+  page?: number
+  perPage?: number
+}
+
+/** GET /admin/delivery-earnings — full disbursement ledger, newest first. */
+export async function listDeliveryEarnings(
+  params: ListDeliveryEarningsParams,
+): Promise<Paginated<DeliveryEarning>> {
+  const { data } = await api.get<Paginated<DeliveryEarning>>('/admin/delivery-earnings', {
+    params: {
+      delivery_man_id: params.deliveryManId,
+      page: params.page,
+      per_page: params.perPage,
+    },
+  })
+  return data
+}
+
+export interface ListDeliveryCashSettlementsParams {
+  deliveryManId?: string
+  page?: number
+  perPage?: number
+}
+
+/**
+ * GET /admin/delivery-cash-settlements — read-only ledger of COD cash riders
+ * have handed back. The settlement itself is rider-initiated; there's no
+ * admin-side write for it.
+ */
+export async function listDeliveryCashSettlements(
+  params: ListDeliveryCashSettlementsParams,
+): Promise<Paginated<DeliveryCashSettlement>> {
+  const { data } = await api.get<Paginated<DeliveryCashSettlement>>(
+    '/admin/delivery-cash-settlements',
+    {
+      params: {
+        delivery_man_id: params.deliveryManId,
+        page: params.page,
+        per_page: params.perPage,
+      },
+    },
+  )
+  return data
 }

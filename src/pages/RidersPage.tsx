@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { DELIVERY_MAN_STATUSES, type DeliveryManStatus } from '@/types/api'
 import {
   useDeliveryMen,
@@ -63,6 +64,14 @@ export function RidersPage() {
           Approve, suspend, and pay out delivery riders. Wallet is what the platform owes; cash in
           hand is COD they still owe back.
         </p>
+        <div className="mt-2 flex gap-4 text-sm">
+          <Link to="/admin/riders/earnings" className="text-brand-700 hover:underline">
+            Earnings ledger →
+          </Link>
+          <Link to="/admin/riders/cash-settlements" className="text-brand-700 hover:underline">
+            Cash settlements →
+          </Link>
+        </div>
       </header>
 
       <div className="mb-4">
