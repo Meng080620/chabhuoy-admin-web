@@ -24,12 +24,12 @@ export function MyOrdersPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="mb-6 text-2xl font-bold text-ink">Your orders</h1>
+      <h1 className="mb-6 font-display text-2xl font-bold text-night-900">Your orders</h1>
 
       {orders.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white px-5 py-8 text-center">
-          <p className="text-sm text-muted">You haven’t placed any orders yet.</p>
-          <Link to="/" className="mt-3 inline-block text-sm font-medium text-brand-700">
+        <div className="rounded-xl border border-plaster-200 bg-white px-5 py-8 text-center">
+          <p className="text-sm text-night-600">You haven’t placed any orders yet.</p>
+          <Link to="/" className="mt-3 inline-block text-sm font-medium text-kram-700">
             Start shopping
           </Link>
         </div>
@@ -40,22 +40,22 @@ export function MyOrdersPage() {
               <li key={order.id}>
                 <Link
                   to={`/orders/${order.id}`}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4 transition hover:border-brand-300 hover:shadow-sm"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-plaster-200 bg-white px-5 py-4 transition hover:border-kram-600/40 hover:shadow-sm"
                 >
                   <div className="min-w-0">
-                    <p className="font-mono text-xs text-muted">#{order.id.slice(0, 8)}</p>
-                    <p className="mt-1 text-sm text-slate-600">{formatDate(order.placed_at)}</p>
+                    <p className="font-mono text-xs text-night-600">#{order.id.slice(0, 8)}</p>
+                    <p className="mt-1 text-sm text-night-600">{formatDate(order.placed_at)}</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <OrderStatusBadge status={order.status} label={order.status_label} />
-                    <span className="font-semibold text-ink">{formatCurrency(order.total)}</span>
+                    <span className="font-semibold text-night-900">{formatCurrency(order.total)}</span>
                   </div>
                 </Link>
               </li>
             ))}
           </ul>
           {data ? (
-            <div className="mt-4 rounded-xl border border-slate-200 bg-white">
+            <div className="mt-4 rounded-xl border border-plaster-200 bg-white">
               <Pagination meta={data.meta} onPage={setPage} isFetching={isFetching} />
             </div>
           ) : null}

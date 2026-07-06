@@ -1,4 +1,5 @@
 import type { Product } from '@/types/api'
+import { demoImage } from './demo'
 
 /**
  * Curated demo catalogue for the storefront landing page. These are NOT real
@@ -26,8 +27,9 @@ function p(
     stock: opts.stock ?? 25,
     in_stock: (opts.stock ?? 25) > 0,
     is_active: true,
-    // Demo cards derive imagery deterministically from `id`, not the API field.
-    image_url: null,
+    // Demo items get an explicit seeded photo — real API products never do;
+    // their imagery comes only from the admin-uploaded `image_url`.
+    image_url: demoImage(id, 400),
     category: { id: seq, name: category },
     created_at: '2026-06-01T00:00:00Z',
     /** Demo "was" price for a strikethrough — present only on sale items. */

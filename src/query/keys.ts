@@ -48,7 +48,7 @@ export const queryKeys = {
   },
   products: {
     all: () => ['products'] as const,
-    list: (params: { search?: string; page?: number }) =>
+    list: (params: { search?: string; page?: number; perPage?: number }) =>
       ['products', 'list', params] as const,
     detail: (id: string) => ['products', 'detail', id] as const,
     // Admin moderation list — all vendors, ignores storefront visibility.

@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate, useSearchParams } from 'react-route
 import { useIsAuthenticated, useUser } from '@/store/auth'
 import { useLogout } from '@/features/auth/useAuth'
 import { useCartCount } from '@/features/cart/useCart'
+import { useCategories } from '@/features/catalog/useCategories'
 import { FOOTER_COLUMNS, NAV_LINKS } from '@/features/catalog/demo'
 
 /**
@@ -16,23 +17,32 @@ export function StorefrontLayout() {
   const user = useUser()
   const logout = useLogout()
   const cartCount = useCartCount()
+  // Live category names drive the nav strip; the demo list only covers a bare
+  // backend so the header never renders empty.
+  const { data: categories } = useCategories()
+  const navLinks =
+    categories && categories.length > 0 ? categories.map((c) => c.name).slice(0, 8) : NAV_LINKS
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white">
+    <div className="flex min-h-screen flex-col bg-plaster-50">
+      <header className="sticky top-0 z-20 border-b border-plaster-200 bg-white">
+        {/* The krama strip — the storefront's signature woven check. */}
+        <div aria-hidden="true" className="krama-check h-1.5" />
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-3">
           <Link to="/" className="leading-tight">
-            <span className="block text-lg font-bold text-ink">Chabhuoy</span>
-            <span className="block text-xs text-muted">Marketplace</span>
+            <span className="block font-display text-lg font-bold text-night-900">Chabhuoy</span>
+            <span className="block font-display text-xs text-kram-700" lang="km">
+              ចាប់ហួយ
+            </span>
           </Link>
 
           <SearchBox />
 
-          <div className="ml-auto hidden items-center gap-2 text-xs leading-tight text-slate-600 lg:flex">
-            <PinIcon className="size-4 text-slate-400" />
+          <div className="ml-auto hidden items-center gap-2 text-xs leading-tight text-night-600 lg:flex">
+            <PinIcon className="size-4 text-night-400" />
             <span>
-              <span className="block text-[10px] text-muted">Delivering to</span>
-              <span className="font-medium text-ink">Phnom Penh</span>
+              <span className="block text-[10px] text-night-600">Delivering to</span>
+              <span className="font-medium text-night-900">Phnom Penh</span>
             </span>
           </div>
 
@@ -40,12 +50,12 @@ export function StorefrontLayout() {
             <NavLink
               to="/cart"
               className={({ isActive }) =>
-                `relative font-medium ${isActive ? 'text-brand-700' : 'text-slate-600 hover:text-ink'}`
+                `relative font-medium ${isActive ? 'text-kram-700' : 'text-night-600 hover:text-night-900'}`
               }
             >
               Cart
               {cartCount > 0 ? (
-                <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-brand-600 px-1.5 text-xs font-semibold text-white">
+                <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-kram-600 px-1.5 text-xs font-semibold text-white">
                   {cartCount}
                 </span>
               ) : null}
@@ -56,18 +66,18 @@ export function StorefrontLayout() {
                 <NavLink
                   to="/orders"
                   className={({ isActive }) =>
-                    `font-medium ${isActive ? 'text-brand-700' : 'text-slate-600 hover:text-ink'}`
+                    `font-medium ${isActive ? 'text-kram-700' : 'text-night-600 hover:text-night-900'}`
                   }
                 >
                   Orders
                 </NavLink>
-                <span className="hidden text-slate-400 sm:inline">·</span>
-                <span className="hidden text-slate-600 sm:inline">{user?.name}</span>
+                <span className="hidden text-night-400 sm:inline">·</span>
+                <span className="hidden text-night-600 sm:inline">{user?.name}</span>
                 <button
                   type="button"
                   onClick={() => logout.mutate()}
                   disabled={logout.isPending}
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                  className="rounded-lg border border-plaster-200 px-3 py-1.5 font-medium text-night-700 hover:bg-plaster-100 disabled:opacity-60"
                 >
                   {logout.isPending ? 'Signing out…' : 'Sign out'}
                 </button>
@@ -75,7 +85,7 @@ export function StorefrontLayout() {
             ) : (
               <Link
                 to="/account"
-                className="rounded-lg border border-slate-200 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-lg border border-plaster-200 px-3 py-1.5 font-medium text-night-700 hover:bg-plaster-100"
               >
                 Sign in
               </Link>
@@ -84,21 +94,21 @@ export function StorefrontLayout() {
         </div>
 
         {/* Category nav strip */}
-        <div className="border-t border-slate-100">
+        <div className="border-t border-plaster-100">
           <div className="mx-auto flex max-w-7xl items-center gap-5 overflow-x-auto px-6 py-2 text-sm">
-            <span className="flex shrink-0 items-center gap-1.5 font-semibold text-ink">
+            <span className="flex shrink-0 items-center gap-1.5 font-semibold text-night-900">
               <GridIcon className="size-4" /> All Categories
             </span>
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link}
                 to={`/?q=${encodeURIComponent(link)}`}
-                className="shrink-0 whitespace-nowrap text-slate-600 hover:text-brand-700"
+                className="shrink-0 whitespace-nowrap text-night-600 hover:text-kram-700"
               >
                 {link}
               </Link>
             ))}
-            <span className="ml-auto shrink-0 font-semibold text-brand-700">Best Deals</span>
+            <span className="ml-auto shrink-0 font-semibold text-kram-700">Best Deals</span>
           </div>
         </div>
       </header>
@@ -127,14 +137,14 @@ function SearchBox() {
   return (
     <form onSubmit={onSubmit} role="search" className="hidden min-w-0 flex-1 sm:block">
       <div className="relative mx-auto max-w-xl">
-        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-night-400" />
         <input
           type="search"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           placeholder="Search products…"
           aria-label="Search products"
-          className="w-full rounded-full border border-slate-300 bg-slate-50 py-2 pl-9 pr-4 text-sm outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-100"
+          className="w-full rounded-full border border-plaster-300 bg-plaster-50 py-2 pl-9 pr-4 text-sm outline-none transition focus:border-kram-600 focus:bg-white focus:ring-2 focus:ring-kram-100"
         />
       </div>
     </form>
@@ -143,16 +153,21 @@ function SearchBox() {
 
 function StorefrontFooter() {
   return (
-    <footer className="border-t border-slate-200 bg-white">
+    <footer className="bg-night-900 text-plaster-100">
+      {/* Closing edge of the same cloth the header opens with. */}
+      <div aria-hidden="true" className="krama-check h-1.5" />
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.heading}>
-              <h3 className="text-sm font-semibold text-ink">{col.heading}</h3>
+              <h3 className="font-display text-sm font-semibold text-white">{col.heading}</h3>
               <ul className="mt-3 space-y-2">
                 {col.links.map((link) => (
                   <li key={link}>
-                    <Link to="/" className="text-sm text-muted hover:text-ink hover:underline">
+                    <Link
+                      to="/"
+                      className="text-sm text-plaster-300 hover:text-white hover:underline"
+                    >
                       {link}
                     </Link>
                   </li>
@@ -162,18 +177,19 @@ function StorefrontFooter() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-6 sm:flex-row">
-          <p className="text-xs text-muted">
-            © {new Date().getFullYear()} Chabhuoy Marketplace. All rights reserved.
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
+          <p className="text-xs text-plaster-300">
+            © {new Date().getFullYear()} Chabhuoy · ចាប់ហួយ — Phnom Penh’s neighborhood
+            marketplace.
           </p>
-          <div className="flex items-center gap-3 text-xs font-medium text-muted">
-            <Link to="/" className="hover:text-ink hover:underline">
+          <div className="flex items-center gap-3 text-xs font-medium text-plaster-300">
+            <Link to="/" className="hover:text-white hover:underline">
               Privacy policy
             </Link>
-            <Link to="/" className="hover:text-ink hover:underline">
+            <Link to="/" className="hover:text-white hover:underline">
               Terms of use
             </Link>
-            <Link to="/" className="hover:text-ink hover:underline">
+            <Link to="/" className="hover:text-white hover:underline">
               Warranty
             </Link>
           </div>

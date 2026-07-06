@@ -26,11 +26,11 @@ export function CartPage() {
   if (items.length === 0) {
     return (
       <div className="max-w-lg">
-        <h1 className="text-2xl font-bold text-ink">Your cart</h1>
-        <p className="mt-2 text-sm text-muted">Your cart is empty.</p>
+        <h1 className="font-display text-2xl font-bold text-night-900">Your cart</h1>
+        <p className="mt-2 text-sm text-night-600">Your cart is empty.</p>
         <Link
           to="/"
-          className="mt-4 inline-block rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          className="mt-4 inline-block rounded-lg bg-kram-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-kram-700"
         >
           Browse products
         </Link>
@@ -40,22 +40,22 @@ export function CartPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="mb-6 text-2xl font-bold text-ink">Your cart</h1>
+      <h1 className="mb-6 font-display text-2xl font-bold text-night-900">Your cart</h1>
 
-      <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+      <div className="divide-y divide-plaster-100 rounded-xl border border-plaster-200 bg-white">
         {items.map((item) => (
           <CartRow key={item.product_id} item={item} />
         ))}
       </div>
 
-      <div className="mt-6 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-5 py-4">
+      <div className="mt-6 flex items-center justify-between rounded-xl border border-plaster-200 bg-white px-5 py-4">
         <div>
-          <p className="text-sm text-muted">Subtotal</p>
-          <p className="text-xl font-semibold text-ink">{formatCurrency(subtotal)}</p>
+          <p className="text-sm text-night-600">Subtotal</p>
+          <p className="text-xl font-semibold text-night-900">{formatCurrency(subtotal)}</p>
         </div>
         <Link
           to="/checkout"
-          className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          className="rounded-lg bg-kram-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-kram-700"
         >
           Proceed to checkout
         </Link>
@@ -75,18 +75,18 @@ function CartRow({ item }: { item: CartItem }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-4">
       <div className="min-w-0">
-        <p className="truncate font-medium text-ink">{item.name}</p>
-        <p className="text-sm text-muted">{formatCurrency(item.unit_price)} each</p>
+        <p className="truncate font-medium text-night-900">{item.name}</p>
+        <p className="text-sm text-night-600">{formatCurrency(item.unit_price)} each</p>
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="flex items-center rounded-lg border border-slate-200">
+        <div className="flex items-center rounded-lg border border-plaster-200">
           <button
             type="button"
             aria-label="Decrease quantity"
             disabled={busy || item.quantity <= 1}
             onClick={() => setQty(item.quantity - 1)}
-            className="px-3 py-1.5 text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            className="px-3 py-1.5 text-night-600 hover:bg-plaster-100 disabled:opacity-40"
           >
             −
           </button>
@@ -96,13 +96,13 @@ function CartRow({ item }: { item: CartItem }) {
             aria-label="Increase quantity"
             disabled={busy || item.quantity >= 99}
             onClick={() => setQty(item.quantity + 1)}
-            className="px-3 py-1.5 text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            className="px-3 py-1.5 text-night-600 hover:bg-plaster-100 disabled:opacity-40"
           >
             +
           </button>
         </div>
 
-        <span className="w-20 text-right font-semibold text-ink">
+        <span className="w-20 text-right font-semibold text-night-900">
           {formatCurrency(Number(item.unit_price) * item.quantity)}
         </span>
 

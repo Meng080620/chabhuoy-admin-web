@@ -38,7 +38,9 @@ const KRAMA: Product = {
   stock: 8,
   in_stock: true,
   is_active: true,
-  image_url: null,
+  // Admin-uploaded image — products without one render the neutral
+  // placeholder (covered in StorefrontProductCard.test), never a stock photo.
+  image_url: 'http://localhost:8000/storage/products/krama.jpg',
   created_at: '2026-06-01T00:00:00Z',
 }
 
@@ -64,19 +66,33 @@ describe('CatalogPage', () => {
     vi.mocked(brandStoreService.listBrandStores).mockResolvedValue([])
   })
 
-  it('renders the demo landing (hero, sections, decorated cards) with no query', async () => {
+  it('renders the landing from the live catalogue with no query', async () => {
     renderAt('/')
 
-    // A demo section heading and a demo product with image + rating.
+    // Lead row renders the real API product, decorated with image + rating.
+    await waitFor(() => expect(screen.getByText('Silk Krama')).toBeInTheDocument())
     expect(screen.getByRole('heading', { name: /today's best deals/i })).toBeInTheDocument()
-    const card = screen.getByText('Nike Invincible 3 Premium').closest('a')!
-    expect(within(card).getByAltText('Nike Invincible 3 Premium')).toBeInTheDocument()
+    const card = screen.getByText('Silk Krama').closest('a')!
+    expect(card).toHaveAttribute('href', '/products/p1')
+    expect(within(card).getByAltText('Silk Krama')).toBeInTheDocument()
     expect(within(card).getByLabelText(/out of 5 stars/i)).toBeInTheDocument()
+    // One catalogue-wide page feeds the grouped rows.
+    expect(productService.listProducts).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, perPage: 60 }),
+    )
     // Trust strip + brand stores prove the full page rendered.
     expect(screen.getByText(/free in-store pickup/i)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /official brand stores/i })).toBeInTheDocument()
-    // Landing must not call the live products endpoint.
-    expect(productService.listProducts).not.toHaveBeenCalled()
+  })
+
+  it('falls back to the demo catalogue when the API has no products', async () => {
+    vi.mocked(productService.listProducts).mockResolvedValue(page([]))
+    renderAt('/')
+
+    await waitFor(() =>
+      expect(screen.getByText('Nike Invincible 3 Premium')).toBeInTheDocument(),
+    )
+    expect(screen.getByRole('heading', { name: /today's best deals/i })).toBeInTheDocument()
   })
 
   it('renders an admin-managed hero banner in place of the demo hero', async () => {

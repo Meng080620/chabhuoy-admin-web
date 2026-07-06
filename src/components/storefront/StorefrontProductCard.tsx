@@ -2,7 +2,7 @@ import { useState, type MouseEvent } from 'react'
 import { Link } from 'react-router-dom'
 import type { Product } from '@/types/api'
 import { formatCurrency } from '@/utils/format'
-import { demoImage, demoRating } from '@/features/catalog/demo'
+import { demoRating, productImage } from '@/features/catalog/demo'
 import { StarRating } from './StarRating'
 
 /** A real Product, optionally carrying a demo-only "was" price. */
@@ -27,33 +27,28 @@ export function StorefrontProductCard({ product }: { product: CardProduct }) {
   return (
     <Link
       to={`/products/${product.id}`}
-      className="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-3 transition hover:border-brand-300 hover:shadow-md"
+      className="group relative flex flex-col rounded-xl border border-plaster-200 bg-white p-3 transition hover:border-kram-600/40 hover:shadow-md"
     >
       <button
         type="button"
         onClick={toggleSave}
         aria-pressed={saved}
         aria-label={saved ? 'Remove from wishlist' : 'Add to wishlist'}
-        className="absolute right-4 top-4 z-10 flex size-7 items-center justify-center rounded-full bg-white/90 text-slate-400 shadow-sm transition hover:text-rose-500"
+        className="absolute right-4 top-4 z-10 flex size-7 items-center justify-center rounded-full bg-white/90 text-night-400 shadow-sm transition hover:text-kram-600"
       >
         <HeartIcon filled={saved} />
       </button>
 
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
-        <img
-          src={demoImage(product.id, 400)}
-          alt={product.name}
-          loading="lazy"
-          className="size-full object-cover transition group-hover:scale-105"
-        />
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-plaster-100">
+        <ProductImage product={product} />
         {!product.in_stock ? (
-          <span className="absolute left-2 top-2 rounded-md bg-slate-900/80 px-2 py-0.5 text-xs font-medium text-white">
+          <span className="absolute left-2 top-2 rounded-md bg-night-900/80 px-2 py-0.5 text-xs font-medium text-white">
             Sold out
           </span>
         ) : null}
       </div>
 
-      <h3 className="mt-3 line-clamp-2 text-sm font-medium text-ink group-hover:text-brand-700">
+      <h3 className="mt-3 line-clamp-2 text-sm font-medium text-night-900 group-hover:text-kram-700">
         {product.name}
       </h3>
 
@@ -62,14 +57,57 @@ export function StorefrontProductCard({ product }: { product: CardProduct }) {
       </div>
 
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-base font-semibold text-ink">{formatCurrency(product.price)}</span>
+        <span className="text-base font-semibold tabular-nums text-night-900">
+          {formatCurrency(product.price)}
+        </span>
         {product.compareAt ? (
-          <span className="text-xs text-slate-400 line-through">
+          <span className="text-xs tabular-nums text-night-400 line-through">
             {formatCurrency(product.compareAt)}
           </span>
         ) : null}
       </div>
     </Link>
+  )
+}
+
+/**
+ * The admin-uploaded image, or a neutral plaster tile when none exists yet.
+ * Never a fabricated stock photo — what the shopper sees is what the catalogue
+ * actually holds.
+ */
+export function ProductImage({ product }: { product: { name: string; image_url: string | null } }) {
+  const src = productImage(product)
+  if (!src) {
+    return (
+      <div
+        data-testid="product-image-placeholder"
+        aria-hidden="true"
+        className="flex size-full items-center justify-center text-plaster-300"
+      >
+        <PackageIcon />
+      </div>
+    )
+  }
+  return (
+    <img
+      src={src}
+      alt={product.name}
+      loading="lazy"
+      className="size-full object-cover transition group-hover:scale-105"
+    />
+  )
+}
+
+function PackageIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="size-10" aria-hidden="true">
+      <path
+        d="M21 8l-9-5-9 5m18 0l-9 5m9-5v8l-9 5m0-13L3 8m9 5v8m-9-13v8l9 5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 

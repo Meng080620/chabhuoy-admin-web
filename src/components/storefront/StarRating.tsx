@@ -36,8 +36,9 @@ function Star({ fill }: { fill: number }) {
     <svg viewBox="0 0 20 20" className="size-3.5" aria-hidden="true">
       <defs>
         <linearGradient id={gradientId}>
-          <stop offset={pct} stopColor="#f59e0b" />
-          <stop offset={pct} stopColor="#e2e8f0" />
+          {/* Filled = Psar Thmei dome gold; empty = warm plaster, not cool gray. */}
+          <stop offset={pct} stopColor="#e8a93c" />
+          <stop offset={pct} stopColor="#eae2d3" />
         </linearGradient>
       </defs>
       <path

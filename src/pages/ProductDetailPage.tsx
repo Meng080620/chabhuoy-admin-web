@@ -7,9 +7,12 @@ import { useIsAuthenticated } from '@/store/auth'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatCurrency, formatNumber } from '@/utils/format'
 import { apiErrorMessage } from '@/lib/api'
-import { demoImage, demoRating } from '@/features/catalog/demo'
+import { demoRating } from '@/features/catalog/demo'
 import { StarRating } from '@/components/storefront/StarRating'
-import { StorefrontProductCard } from '@/components/storefront/StorefrontProductCard'
+import {
+  ProductImage,
+  StorefrontProductCard,
+} from '@/components/storefront/StorefrontProductCard'
 
 export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>()
@@ -30,7 +33,7 @@ export function ProductDetailPage() {
             ? 'This product is no longer available.'
             : apiErrorMessage(error, 'Could not load this product.')}
         </p>
-        <Link to="/" className="mt-4 inline-block text-sm font-medium text-brand-700">
+        <Link to="/" className="mt-4 inline-block text-sm font-medium text-kram-700">
           ← Back to shop
         </Link>
       </div>
@@ -41,41 +44,37 @@ export function ProductDetailPage() {
 
   return (
     <div className="max-w-5xl">
-      <Link to="/" className="text-sm font-medium text-brand-700">
+      <Link to="/" className="text-sm font-medium text-kram-700">
         ← Back to shop
       </Link>
 
       <div className="mt-4 grid gap-8 lg:grid-cols-2">
-        <div className="aspect-square overflow-hidden rounded-xl bg-slate-100">
-          <img
-            src={demoImage(product.id, 600)}
-            alt={product.name}
-            className="size-full object-cover"
-          />
+        <div className="aspect-square overflow-hidden rounded-xl bg-plaster-100">
+          <ProductImage product={product} />
         </div>
 
         <div>
           {product.category ? (
-            <p className="text-xs uppercase tracking-wide text-muted">{product.category.name}</p>
+            <p className="text-xs uppercase tracking-wide text-night-600">{product.category.name}</p>
           ) : null}
-          <h1 className="mt-1 text-2xl font-bold text-ink">{product.name}</h1>
+          <h1 className="mt-1 font-display text-2xl font-bold text-night-900">{product.name}</h1>
           {product.vendor ? (
-            <p className="mt-1 text-sm text-muted">Sold by {product.vendor.name}</p>
+            <p className="mt-1 text-sm text-night-600">Sold by {product.vendor.name}</p>
           ) : null}
 
           <div className="mt-2">
             <StarRating stars={rating.stars} count={rating.count} />
           </div>
 
-          <p className="mt-4 text-3xl font-semibold text-ink">{formatCurrency(product.price)}</p>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-4 text-3xl font-semibold text-night-900">{formatCurrency(product.price)}</p>
+          <p className="mt-1 text-sm text-night-600">
             {product.in_stock
               ? `${formatNumber(product.stock)} in stock`
               : 'Currently out of stock'}
           </p>
 
           {product.description ? (
-            <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-700">
+            <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-night-700">
               {product.description}
             </p>
           ) : null}
@@ -105,7 +104,7 @@ function RelatedProducts({ excludeId }: { excludeId: string }) {
 
   return (
     <section className="mt-12">
-      <h2 className="mb-4 text-lg font-bold text-ink">You may also like</h2>
+      <h2 className="mb-4 font-display text-lg font-bold text-night-900">You may also like</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {related.map((p) => (
           <StorefrontProductCard key={p.id} product={p} />
@@ -129,7 +128,7 @@ function BuyButton({ product }: { product: Product }) {
       <button
         type="button"
         disabled
-        className="w-full rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400 sm:w-auto"
+        className="w-full rounded-lg bg-plaster-100 px-4 py-2.5 text-sm font-semibold text-night-400 sm:w-auto"
       >
         Out of stock
       </button>
@@ -141,7 +140,7 @@ function BuyButton({ product }: { product: Product }) {
       <Link
         to="/account"
         state={{ from: `/products/${product.id}` }}
-        className="inline-block w-full rounded-lg bg-brand-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-brand-700 sm:w-auto"
+        className="inline-block w-full rounded-lg bg-kram-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-kram-700 sm:w-auto"
       >
         Sign in to buy
       </Link>
@@ -160,12 +159,12 @@ function BuyButton({ product }: { product: Product }) {
             product: { name: product.name, unit_price: product.price },
           })
         }
-        className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60 sm:w-auto"
+        className="w-full rounded-lg bg-kram-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-kram-700 disabled:opacity-60 sm:w-auto"
       >
         {setCartItem.isPending ? 'Adding…' : 'Add to cart'}
       </button>
       {setCartItem.isSuccess ? (
-        <p className="mt-2 text-sm text-green-700" role="status">
+        <p className="mt-2 text-sm text-lotus-700" role="status">
           Added to cart. <Link to="/cart" className="font-medium underline">View cart</Link>
         </p>
       ) : setCartItem.isError ? (

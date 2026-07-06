@@ -6,6 +6,7 @@ import { useBanners } from '@/features/banners/useBanners'
 import { useBrandStores } from '@/features/brand-stores/useBrandStores'
 import { categoryTiles } from '@/features/catalog/demo'
 import { DEMO_SECTIONS, CIRCLE_CATEGORIES } from '@/features/catalog/demoCatalog'
+import { buildLandingRows } from '@/features/catalog/landingRows'
 import { Spinner } from '@/components/ui/Spinner'
 import { Pagination } from '@/components/ui/Pagination'
 import { apiErrorMessage } from '@/lib/api'
@@ -27,9 +28,10 @@ import {
  *
  * With a `?q=` term (from the header search box) it renders a flat, paginated
  * results grid backed by the real `GET /products`. Without one it renders the
- * Emox-style landing page from a curated demo catalogue ([[demoCatalog]]) so the
- * page always looks complete — a "demo mock visuals" build. Only the category
- * tiles are wired to live data (`GET /categories`), falling back to demo tiles.
+ * Emox-style landing page from the live catalogue: one `GET /products` page
+ * grouped into category rows ([[landingRows]]), plus live banners, brand
+ * stores, and category tiles. Every section keeps a demo fallback
+ * ([[demoCatalog]]) so the page never renders empty against a bare backend.
  */
 export function CatalogPage() {
   const [searchParams] = useSearchParams()
@@ -53,8 +55,8 @@ function SearchResults({ query }: { query: string }) {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-bold text-ink">Results for “{query}”</h1>
-      <p className="mb-6 text-sm text-muted">
+      <h1 className="mb-1 font-display text-xl font-bold text-night-900">Results for “{query}”</h1>
+      <p className="mb-6 text-sm text-night-600">
         {data ? `${data.meta.total} product${data.meta.total === 1 ? '' : 's'}` : ' '}
       </p>
 
@@ -67,12 +69,12 @@ function SearchResults({ query }: { query: string }) {
               <StorefrontProductCard key={p.id} product={p} />
             ))}
           </div>
-          <div className="mt-4 rounded-xl border border-slate-200 bg-white">
+          <div className="mt-4 rounded-xl border border-plaster-200 bg-white">
             <Pagination meta={data!.meta} onPage={setPage} isFetching={isFetching} />
           </div>
         </>
       ) : (
-        <p className="text-sm text-muted">No products match “{query}”.</p>
+        <p className="text-sm text-night-600">No products match “{query}”.</p>
       )}
     </div>
   )
@@ -92,27 +94,38 @@ function Landing() {
   const { data: ecoBanners } = useBanners('eco')
   const { data: brandStores } = useBrandStores()
 
-  const section = (id: string) => DEMO_SECTIONS.find((s) => s.id === id)
-  const row = (id: string, to?: string) => {
-    const s = section(id)
-    return s ? <ProductRow title={s.title} to={to} products={s.products} /> : null
+  // Live catalogue → grouped category rows; demo sections only once the query
+  // settles empty (bare backend) — never while loading, so live data doesn't
+  // replace a demo flash. One page covers the catalogue at current size.
+  const { data: productPage, isPending } = useProducts({ page: 1, perPage: 60 })
+  const liveRows = buildLandingRows(productPage?.data ?? [])
+  const sections =
+    liveRows.length > 0
+      ? liveRows
+      : isPending
+        ? []
+        : DEMO_SECTIONS.map((s) => ({ id: s.id, title: s.title, products: s.products }))
+
+  const row = (i: number) => {
+    const s = sections[i]
+    return s ? <ProductRow key={s.id} title={s.title} products={s.products} /> : null
   }
 
   return (
     <Stack>
       <HeroPanels banners={heroBanners} />
       <CircularCategoryRow tiles={tiles} />
-      {row('best-deals', '/?q=deals')}
+      {row(0)}
       <PromoTrio banners={promoBanners} />
-      {row('winter')}
+      {row(1)}
       <BrandStores stores={brandStores} />
-      {row('electronics', '/?q=electronics')}
+      {row(2)}
       <RamadanBanner banner={seasonalBanners?.[0]} />
-      {row('grocery', '/?q=grocery')}
+      {row(3)}
       <EcoPromo banner={ecoBanners?.[0]} />
-      {row('beauty')}
-      {row('appliances')}
-      {row('fashion', '/?q=fashion')}
+      {row(4)}
+      {row(5)}
+      {row(6)}
       <ServiceBadges />
     </Stack>
   )
