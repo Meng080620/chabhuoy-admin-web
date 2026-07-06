@@ -43,6 +43,8 @@ export interface Vendor {
   status: VendorStatus
   /** Decimal — Laravel serializes as string; only present for admin/owner. */
   payout_balance?: string | number | null
+  /** Platform take rate, 0-100. Decimal string; only present for admin/owner. */
+  commission_rate?: string | number | null
 }
 
 // DeliveryMan::STATUS_* — rider account status (same three values as vendors).
@@ -78,6 +80,18 @@ export interface DeliveryEarning {
   /** Disbursement provider reference (disb_…), or null. */
   reference: string | null
   processed_at: string | null
+  created_at: string
+}
+
+// app/Http/Resources/DeliveryCashSettlementResource.php — COD cash a rider
+// handed back to the platform. Read-only from the admin side; the rider
+// initiates the settlement themselves (no admin-facing write endpoint).
+export interface DeliveryCashSettlement {
+  /** uuid */
+  id: string
+  delivery_man?: { id: string; name: string }
+  amount: string | number
+  settled_at: string | null
   created_at: string
 }
 

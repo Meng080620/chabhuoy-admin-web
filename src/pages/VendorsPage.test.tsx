@@ -23,7 +23,7 @@ const page = (vendors: Vendor[]): Paginated<Vendor> => ({
   },
 })
 
-const ACME: Vendor = { id: 'v1', name: 'Acme Co.', status: 'pending' }
+const ACME: Vendor = { id: 'v1', name: 'Acme Co.', status: 'pending', commission_rate: '10.00' }
 const BETA: Vendor = { id: 'v2', name: 'Beta LLC', status: 'active' }
 
 function renderPage() {
@@ -98,6 +98,31 @@ describe('VendorsPage', () => {
       expect(vendorService.listVendors).toHaveBeenLastCalledWith(
         expect.objectContaining({ status: 'suspended', page: 1 }),
       ),
+    )
+  })
+
+  it('saves a new commission rate and reflects the server-returned value', async () => {
+    vi.mocked(vendorService.updateVendorCommission).mockResolvedValue({
+      ...ACME,
+      commission_rate: '15.00',
+    })
+    const user = userEvent.setup()
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('Acme Co.')).toBeInTheDocument())
+    const input = rowFor('Acme Co.').getByLabelText('Commission rate for vendor v1')
+    expect(input).toHaveValue(10)
+
+    // The Save button stays disabled until the value actually changes.
+    expect(rowFor('Acme Co.').getByRole('button', { name: 'Save' })).toBeDisabled()
+
+    await user.clear(input)
+    await user.type(input, '15')
+    await user.click(rowFor('Acme Co.').getByRole('button', { name: 'Save' }))
+
+    expect(vendorService.updateVendorCommission).toHaveBeenCalledWith('v1', 15)
+    await waitFor(() =>
+      expect(rowFor('Acme Co.').getByRole('button', { name: 'Save' })).toBeDisabled(),
     )
   })
 })

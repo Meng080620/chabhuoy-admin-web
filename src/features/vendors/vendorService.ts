@@ -31,3 +31,14 @@ export async function updateVendorStatus(
   })
   return data.data
 }
+
+/**
+ * PATCH /admin/vendors/{id}/commission — sets the platform's take rate.
+ * `rate` is `0-100`; only affects lines delivered after this call.
+ */
+export async function updateVendorCommission(id: string, rate: number): Promise<Vendor> {
+  const { data } = await api.patch<Wrapped<Vendor>>(`/admin/vendors/${id}/commission`, {
+    commission_rate: rate,
+  })
+  return data.data
+}

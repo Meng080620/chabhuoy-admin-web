@@ -65,8 +65,18 @@ export const queryKeys = {
   },
   deliveryMen: {
     all: () => ['delivery-men'] as const,
-    list: (params: { status?: string; page?: number; perPage?: number }) =>
+    list: (params: { status?: string; search?: string; page?: number; perPage?: number }) =>
       ['delivery-men', 'list', params] as const,
+  },
+  deliveryEarnings: {
+    all: () => ['delivery-earnings'] as const,
+    list: (params: { deliveryManId?: string; page?: number; perPage?: number }) =>
+      ['delivery-earnings', 'list', params] as const,
+  },
+  deliveryCashSettlements: {
+    all: () => ['delivery-cash-settlements'] as const,
+    list: (params: { deliveryManId?: string; page?: number; perPage?: number }) =>
+      ['delivery-cash-settlements', 'list', params] as const,
   },
   cart: {
     current: () => ['cart'] as const,

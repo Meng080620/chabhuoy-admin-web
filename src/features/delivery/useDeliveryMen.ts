@@ -14,6 +14,7 @@ export function useDeliveryMen(params: ListDeliveryMenParams) {
     // not share a cache entry.
     queryKey: queryKeys.deliveryMen.list({
       status: params.status,
+      search: params.search,
       page: params.page,
       perPage: params.perPage,
     }),
@@ -76,6 +77,9 @@ export function useDisburseDeliveryEarning() {
 
   return useMutation({
     mutationFn: (id: string) => disburseDeliveryEarning(id),
-    onSettled: () => qc.invalidateQueries({ queryKey: queryKeys.deliveryMen.all() }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.deliveryMen.all() })
+      qc.invalidateQueries({ queryKey: queryKeys.deliveryEarnings.all() })
+    },
   })
 }

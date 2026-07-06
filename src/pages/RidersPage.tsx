@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { DELIVERY_MAN_STATUSES, type DeliveryManStatus } from '@/types/api'
 import {
   useDeliveryMen,
@@ -26,10 +27,22 @@ const ACTIONS: Record<DeliveryManStatus, Array<{ label: string; to: DeliveryManS
 
 export function RidersPage() {
   const [filter, setFilter] = useState<Filter>('all')
+  const [input, setInput] = useState('')
+  const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+
+  // Debounce the search box so we don't fire a request per keystroke.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setSearch(input.trim())
+      setPage(1)
+    }, 350)
+    return () => clearTimeout(id)
+  }, [input])
 
   const { data, isLoading, isFetching, error } = useDeliveryMen({
     status: filter === 'all' ? undefined : filter,
+    search,
     page,
     perPage: 15,
   })
@@ -51,7 +64,25 @@ export function RidersPage() {
           Approve, suspend, and pay out delivery riders. Wallet is what the platform owes; cash in
           hand is COD they still owe back.
         </p>
+        <div className="mt-2 flex gap-4 text-sm">
+          <Link to="/admin/riders/earnings" className="text-brand-700 hover:underline">
+            Earnings ledger →
+          </Link>
+          <Link to="/admin/riders/cash-settlements" className="text-brand-700 hover:underline">
+            Cash settlements →
+          </Link>
+        </div>
       </header>
+
+      <div className="mb-4">
+        <input
+          type="search"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Search by name…"
+          className="w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+        />
+      </div>
 
       <div className="mb-4 flex gap-2">
         {FILTERS.map((f) => (
@@ -165,7 +196,7 @@ export function RidersPage() {
             <Pagination meta={data.meta} onPage={setPage} isFetching={isFetching} />
           </>
         ) : (
-          <p className="px-4 py-6 text-sm text-muted">No riders match this filter.</p>
+          <p className="px-4 py-6 text-sm text-muted">No riders match this filter or search.</p>
         )}
       </div>
     </div>
