@@ -43,6 +43,8 @@ export interface Vendor {
   status: VendorStatus
   /** Decimal — Laravel serializes as string; only present for admin/owner. */
   payout_balance?: string | number | null
+  /** Platform take rate, 0-100. Decimal string; only present for admin/owner. */
+  commission_rate?: string | number | null
 }
 
 // DeliveryMan::STATUS_* — rider account status (same three values as vendors).

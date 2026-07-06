@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { Paginated, Vendor } from '@/types/api'
 import { queryKeys } from '@/query/keys'
 import * as vendorService from './vendorService'
-import { useUpdateVendorStatus, useVendors } from './useVendors'
+import { useUpdateVendorCommission, useUpdateVendorStatus, useVendors } from './useVendors'
 
 vi.mock('./vendorService')
 
@@ -118,5 +118,39 @@ describe('useUpdateVendorStatus — optimistic update', () => {
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: queryKeys.dashboard.summary(),
     })
+  })
+})
+
+describe('useUpdateVendorCommission', () => {
+  const ACME: Vendor = { id: 'v1', name: 'Acme', status: 'active', commission_rate: '10.00' }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(vendorService.listVendors).mockResolvedValue(page([ACME]))
+  })
+
+  it('patches the cached row with the server-returned rate on success', async () => {
+    vi.mocked(vendorService.updateVendorCommission).mockResolvedValue({
+      ...ACME,
+      commission_rate: '15.00',
+    })
+
+    const { wrapper } = createWrapper()
+    const { result } = renderHook(
+      () => ({ list: useVendors({}), update: useUpdateVendorCommission() }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.list.isSuccess).toBe(true))
+
+    act(() => {
+      result.current.update.mutate({ id: 'v1', rate: 15 })
+    })
+
+    await waitFor(() => expect(result.current.update.isSuccess).toBe(true))
+    expect(vendorService.updateVendorCommission).toHaveBeenCalledWith('v1', 15)
+    await waitFor(() =>
+      expect(result.current.list.data?.data?.[0]?.commission_rate).toBe('15.00'),
+    )
   })
 })

@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/query/keys'
 import type { Paginated, Vendor, VendorStatus } from '@/types/api'
-import { listVendors, updateVendorStatus, type ListVendorsParams } from './vendorService'
+import {
+  listVendors,
+  updateVendorCommission,
+  updateVendorStatus,
+  type ListVendorsParams,
+} from './vendorService'
 
 export function useVendors(params: ListVendorsParams) {
   return useQuery({
@@ -54,6 +59,29 @@ export function useUpdateVendorStatus() {
       // A suspended vendor's payout_balance drops out of the dashboard's
       // pending-payouts queue, so the summary must refetch too.
       qc.invalidateQueries({ queryKey: queryKeys.dashboard.summary() })
+    },
+  })
+}
+
+interface UpdateCommissionVars {
+  id: string
+  rate: number
+}
+
+/**
+ * Sets a vendor's take rate. No optimistic update — the new rate only
+ * governs future deliveries, so there's nothing on-screen to flip early.
+ */
+export function useUpdateVendorCommission() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, rate }: UpdateCommissionVars) => updateVendorCommission(id, rate),
+    onSuccess: (vendor) => {
+      qc.setQueriesData<Paginated<Vendor>>({ queryKey: queryKeys.vendors.all() }, (page) => {
+        if (!page) return page
+        return { ...page, data: page.data.map((v) => (v.id === vendor.id ? vendor : v)) }
+      })
     },
   })
 }
